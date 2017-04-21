@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -18,11 +20,14 @@ import javax.persistence.Table;
 public class Passenger implements java.io.Serializable {
 
 	//private static final long serialVersionUID = 4910225916550731446L;
+	@ManyToOne
+	@JoinColumn(name = "flight_id")
+	private Flight flight;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", unique = true, nullable = false)
-	private String id;
+	private Long id;
 
 	@Column(name = "firstname", length = 50)
 	private String firstname;
@@ -42,15 +47,26 @@ public class Passenger implements java.io.Serializable {
 	public int getAge() {
 		return age;
 	}
+	
+	@ManyToOne
+	@JoinColumn(name = "passenger_flight_id")
+    public Flight getFlight() {
+        return flight;
+    }
+
+    public void setFlight(Flight flight) {
+        this.flight = flight;
+    }
+	
 
 	public Passenger() {
 	}
 
-	public Passenger(String id) {
+	public Passenger(Long id) {
 		this.id = id;
 	}
 
-	public Passenger(String id, String firstname, String lastname, int age, String gender, String phone) {
+	public Passenger(Long id, String firstname, String lastname, int age, String gender, String phone) {
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
@@ -67,11 +83,11 @@ public class Passenger implements java.io.Serializable {
 		this.phone = phone;
 	}
 
-	public String getId() {
+	public Long getId() {
 		return this.id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

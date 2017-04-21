@@ -2,12 +2,7 @@ package edu.sjsu.cmpe275.lab2.model;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * 
@@ -23,12 +18,17 @@ public class Reservation implements java.io.Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "orderNumber", unique = true, nullable = false)
+	@Column(name = "id", unique = true, nullable = false)
+	private Long id;
+	
+	
+	@Column(name = "orderNumber", unique = true, nullable = false, length =50)
 	private String orderNumber;
 
 	@Column(name = "price", length = 50)
 	private int price;
 
+	@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
 	private List<Flight> flights;
 
 	private Passenger passenger;
@@ -55,11 +55,11 @@ public class Reservation implements java.io.Serializable {
 
 	
 
-	public String getOrderNumber() {
+	public String getorderNumber() {
 		return orderNumber;
 	}
 
-	public void setOrderNumber(String orderNumber) {
+	public void setorderNumber(String orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
@@ -71,13 +71,27 @@ public class Reservation implements java.io.Serializable {
 		this.price = price;
 	}
 
-	public List<Flight> getFlights() {
-		return flights;
-	}
+//	public List<Flight> getFlights() {
+//		return flights;
+//	}
+//
+//	public void setFlights(List<Flight> flights) {
+//		this.flights = flights;
+//	}
+	
+	
+	//@OneToMany(cascade = {CascadeType.ALL})
+    //@JoinTable(name = "passenger_reservation", joinColumns = @JoinColumn(name = "passenger_id"), inverseJoinColumns = @JoinColumn(name = "reservation_id"))
+	//@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    public List<Flight> getFlights() {
+        return flights;
+    }
 
-	public void setFlights(List<Flight> flights) {
-		this.flights = flights;
-	}
+    public void setRoles(List<Flight> flights) {
+        this.flights = flights;
+    }
+	
+	
 
 	public Passenger getPassenger() {
 		return passenger;
@@ -90,7 +104,7 @@ public class Reservation implements java.io.Serializable {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("OrderNumber: ").append(this.orderNumber).append(", passenger: ").append(this.passenger).append(", price: ")
+		sb.append("orderNumber: ").append(this.orderNumber).append(", passenger: ").append(this.passenger).append(", price: ")
 				.append(this.price);
 		return sb.toString();
 	}
