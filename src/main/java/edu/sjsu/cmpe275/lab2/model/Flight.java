@@ -55,8 +55,12 @@ public class Flight implements java.io.Serializable {
 	//@Column(name = "plane")
 	 // Embedded
 	
-	@OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
 	private List<Passenger> passengers;
+	
+//	@OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
+//	private List<Passenger> passengers;
 	
 	
 

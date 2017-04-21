@@ -1,12 +1,17 @@
 package edu.sjsu.cmpe275.lab2.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -20,9 +25,21 @@ import javax.persistence.Table;
 public class Passenger implements java.io.Serializable {
 
 	//private static final long serialVersionUID = 4910225916550731446L;
-	@ManyToOne
-	@JoinColumn(name = "flight_id")
-	private Flight flight;
+//	@ManyToOne
+//	@JoinColumn(name = "flight_id")
+//	private Flight flight;
+	
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
+	private List<Reservation> reseravtions;
+
+	public List<Reservation> getReseravtions() {
+		return reseravtions;
+	}
+
+	public void setReseravtions(List<Reservation> reseravtions) {
+		this.reseravtions = reseravtions;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,15 +65,13 @@ public class Passenger implements java.io.Serializable {
 		return age;
 	}
 	
-	@ManyToOne
-	@JoinColumn(name = "passenger_flight_id")
-    public Flight getFlight() {
-        return flight;
-    }
-
-    public void setFlight(Flight flight) {
-        this.flight = flight;
-    }
+//    public Flight getFlight() {
+//        return flight;
+//    }
+//
+//    public void setFlight(Flight flight) {
+//        this.flight = flight;
+//    }
 	
 
 	public Passenger() {
