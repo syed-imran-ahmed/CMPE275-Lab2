@@ -44,7 +44,7 @@ public class Passenger implements java.io.Serializable {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
-	private List<Reservation> reseravtions;
+	private List<Reservation> reservations;
 
 	public Passenger() {
 	}
@@ -119,12 +119,12 @@ public class Passenger implements java.io.Serializable {
 	}
 	
 
-	public List<Reservation> getReseravtions() {
-		return reseravtions;
+	public List<Reservation> getReservations() {
+		return reservations;
 	}
 
-	public void setReseravtions(List<Reservation> reseravtions) {
-		this.reseravtions = reseravtions;
+	public void setReservations(List<Reservation> reservations) {
+		this.reservations = reservations;
 	}
 
 	@Override
