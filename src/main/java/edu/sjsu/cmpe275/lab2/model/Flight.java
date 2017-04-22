@@ -17,9 +17,6 @@ public class Flight implements java.io.Serializable {
 
 	//private static final long serialVersionUID = 4910225916550731446L;
 	
-	@ManyToOne
-	@JoinColumn(name = "reservation_ordernumber")
-	private Reservation reservation;
 	
 	private Plane plane;
 
@@ -72,18 +69,20 @@ public class Flight implements java.io.Serializable {
 	}
 
 	public Flight(String number, int price, String from_origin, String to_destination, Date departureTime, Date arrivalTime,
-			String seatsLeft, String description, Plane plane, List<Passenger> passengers ) {
+			int seatsLeft, String description, Plane plane ) {
 		this.number = number;
 		this.price = price;
 		this.from_origin = from_origin;
 		this.to_destination = to_destination;
+		this.departureTime = departureTime;
+		this.arrivalTime = arrivalTime;
+		this.seatsLeft = seatsLeft;
 		this.description = description;
 		this.plane = plane;
-		this.passengers = passengers;
 	}
 
 	public Flight(int price, String from_origin, String to_destination, Date departureTime, Date arrivalTime,
-			String seatsLeft, String description, Plane plane, List<Passenger> passengers) {
+			int seatsLeft, String description, Plane plane, List<Passenger> passengers) {
 		this.price = price;
 		this.from_origin = from_origin;
 		this.to_destination = to_destination;
@@ -178,13 +177,6 @@ public class Flight implements java.io.Serializable {
 	
 //	@ManyToOne
 //	@JoinColumn(name = "flight_reservation_id")
-    public Reservation getReservation() {
-        return reservation;
-    }
-
-    public void setReservation(Reservation resservation) {
-        this.reservation = reservation;
-    }
 
 	
 	

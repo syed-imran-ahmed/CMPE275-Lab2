@@ -28,7 +28,8 @@ public class Reservation implements java.io.Serializable {
 	@Column(name = "price", length = 50)
 	private int price;
 
-	@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number") })
 	private List<Flight> flights;
 
 	private Passenger passenger;
@@ -43,7 +44,7 @@ public class Reservation implements java.io.Serializable {
 	public Reservation(String orderNumber, int price, List<Flight> flights, Passenger passenger) {
 		this.orderNumber = orderNumber;
 		this.price = price;
-		this.flights = flights;
+		this.flights = flights;	
 		this.passenger = passenger;
 	}
 
