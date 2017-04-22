@@ -1,21 +1,19 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.sjsu.cmpe275.lab2.model.Flight;
+import edu.sjsu.cmpe275.lab2.model.Plane;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 
 /**
@@ -48,8 +46,8 @@ public class FlightController {
 			@RequestParam("yearOfManufacture") int yearOfManufacture) {
 		
 		
-		
-		Flight flight = new Flight(flightNumber,price,from,to,departureTime,arrivalTime,capacity,description);
+		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
+		Flight flight = new Flight(flightNumber,price,from,to,departureTime,arrivalTime,capacity,description, plane);
 		flightService.save(flight);
 		logger.debug("Added:: " + flight);
 		return new ResponseEntity<Flight>(flight, HttpStatus.CREATED);
