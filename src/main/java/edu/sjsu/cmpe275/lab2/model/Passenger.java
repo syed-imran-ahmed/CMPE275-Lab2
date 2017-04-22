@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -24,11 +23,8 @@ import javax.persistence.Table;
 @Table(name = "passenger")
 public class Passenger implements java.io.Serializable {
 
-	//private static final long serialVersionUID = 4910225916550731446L;
-//	@ManyToOne
-//	@JoinColumn(name = "flight_id")
-//	private Flight flight;
-	
+	private static final long serialVersionUID = 1L;
+
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
 	private List<Reservation> reseravtions;
