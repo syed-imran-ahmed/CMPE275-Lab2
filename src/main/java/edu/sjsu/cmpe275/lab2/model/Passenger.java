@@ -10,36 +10,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
- * 
  * @author Imran
- *
  */
-
 @Entity
 @Table(name = "passenger")
 public class Passenger implements java.io.Serializable {
 
-	//private static final long serialVersionUID = 4910225916550731446L;
-//	@ManyToOne
-//	@JoinColumn(name = "flight_id")
-//	private Flight flight;
-	
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
-	private List<Reservation> reseravtions;
-
-	public List<Reservation> getReseravtions() {
-		return reseravtions;
-	}
-
-	public void setReseravtions(List<Reservation> reseravtions) {
-		this.reseravtions = reseravtions;
-	}
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,18 +42,9 @@ public class Passenger implements java.io.Serializable {
 	@Column(name = "phone",unique = true, nullable = false)
 	private String phone;
 
-	public int getAge() {
-		return age;
-	}
-	
-//    public Flight getFlight() {
-//        return flight;
-//    }
-//
-//    public void setFlight(Flight flight) {
-//        this.flight = flight;
-//    }
-	
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
+	private List<Reservation> reseravtions;
 
 	public Passenger() {
 	}
@@ -121,6 +93,10 @@ public class Passenger implements java.io.Serializable {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
+
+	public int getAge() {
+		return age;
+	}
 	
 	public void setAge(int age) {
 		this.age = age;
@@ -140,7 +116,16 @@ public class Passenger implements java.io.Serializable {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
-	}	
+	}
+	
+
+	public List<Reservation> getReseravtions() {
+		return reseravtions;
+	}
+
+	public void setReseravtions(List<Reservation> reseravtions) {
+		this.reseravtions = reseravtions;
+	}
 
 	@Override
 	public String toString() {
