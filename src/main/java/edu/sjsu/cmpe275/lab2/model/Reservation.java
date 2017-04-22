@@ -16,12 +16,13 @@ public class Reservation implements java.io.Serializable {
 
 	//private static final long serialVersionUID = 4910225916550731446L;
 
+//	@Id
+//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//	@Column(name = "id", unique = true, nullable = false)
+//	private Long id;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", unique = true, nullable = false)
-	private Long id;
-	
-	
 	@Column(name = "orderNumber", unique = true, nullable = false, length =50)
 	private String orderNumber;
 
