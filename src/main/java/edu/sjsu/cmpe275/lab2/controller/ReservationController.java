@@ -56,7 +56,7 @@ public class ReservationController {
 		}
 		reservation.setPrice(totalPrice);
 		reservationService.save(reservation);
-		logger.debug("Created reservation " + reservation.getOrderNumber());
+		logger.debug("Created reservation " + reservation.getOrdernumber());
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.CREATED);
 	}
 }

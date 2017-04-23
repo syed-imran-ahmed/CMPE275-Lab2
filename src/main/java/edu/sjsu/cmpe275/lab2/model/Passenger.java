@@ -8,10 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 /**
  * @author Imran
@@ -42,8 +42,8 @@ public class Passenger implements java.io.Serializable {
 	@Column(name = "phone",unique = true, nullable = false)
 	private String phone;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
+	@OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL)
+	@JsonManagedReference
 	private List<Reservation> reservations;
 
 	public Passenger() {

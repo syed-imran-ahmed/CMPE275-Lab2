@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -34,7 +35,8 @@ public class Flight implements java.io.Serializable {
 	private String description;
 	@Embedded
 	private Plane plane;
-	private List<Passenger> passengers;
+	//private List<Passenger> passengers;
+	private List<Reservation> reservations;
 
     @Id
 	public String getNumber() {
@@ -109,21 +111,30 @@ public class Flight implements java.io.Serializable {
 		this.plane = plane;
 	}
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
-	public List<Passenger> getPassengers() {
-		return passengers;
+	@ManyToMany(mappedBy="flights")
+	public List<Reservation> getReservations() {
+		return reservations;
 	}
-
-	public void setPassengers(List<Passenger> passengers) {
-		this.passengers = passengers;
+	
+	public void setReservations(List<Reservation> reservations) {
+		this.reservations = reservations;
 	}
+	
+//	@OneToMany(cascade = CascadeType.ALL)
+//	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
+//	public List<Passenger> getPassengers() {
+//		return passengers;
+//	}
+//
+//	public void setPassengers(List<Passenger> passengers) {
+//		this.passengers = passengers;
+//	}
 
 	@Override
 	public String toString() {
 		return "Flight [number=" + number + ", price=" + price + ", from=" + from + ", to=" + to + ", departureTime="
 				+ departureTime + ", arrivalTime=" + arrivalTime + ", seatsLeft=" + seatsLeft + ", description="
-				+ description + ", passengers=" + passengers + "]";
+				+ description + "]";
 	}
 
 	@Override

@@ -2,7 +2,18 @@ package edu.sjsu.cmpe275.lab2.model;
 
 import java.util.List;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 /**
  * @author Imran
@@ -13,7 +24,7 @@ public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;
 
-	private Long orderNumber;
+	private Long ordernumber;
 	private Passenger passenger;
 	private int price;
 	private List<Flight> flights;
@@ -21,12 +32,12 @@ public class Reservation implements java.io.Serializable {
 	public Reservation() {
 	}
 
-	public Reservation(Long orderNumber) {
-		this.orderNumber = orderNumber;
+	public Reservation(Long ordernumber) {
+		this.ordernumber = ordernumber;
 	}
 
-	public Reservation(Long orderNumber, int price, List<Flight> flights, Passenger passenger) {
-		this.orderNumber = orderNumber;
+	public Reservation(Long ordernumber, int price, List<Flight> flights, Passenger passenger) {
+		this.ordernumber = ordernumber;
 		this.price = price;
 		this.flights = flights;	
 		this.passenger = passenger;
@@ -40,16 +51,17 @@ public class Reservation implements java.io.Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public Long getOrderNumber() {
-		return orderNumber;
+	public Long getOrdernumber() {
+		return ordernumber;
 	}
 
-	public void setOrderNumber(Long orderNumber) {
-		this.orderNumber = orderNumber;
+	public void setOrdernumber(Long ordernumber) {
+		this.ordernumber = ordernumber;
 	}
 
-	//@OneToOne(cascade = CascadeType.ALL)
-	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
+	@ManyToOne
+	@JsonBackReference
+	@JoinColumn(name = "passenger_id")
 	public Passenger getPassenger() {
 		return passenger;
 	}
@@ -66,8 +78,8 @@ public class Reservation implements java.io.Serializable {
 		this.price = price;
 	}
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number") })
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber", referencedColumnName="ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") })
     public List<Flight> getFlights() {
         return flights;
     }
@@ -79,7 +91,7 @@ public class Reservation implements java.io.Serializable {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("orderNumber: ").append(this.orderNumber).append(", passenger: ").append(this.passenger).append(", price: ")
+		sb.append("ordernumber: ").append(this.ordernumber).append(", passenger: ").append(this.passenger).append(", price: ")
 				.append(this.price);
 		return sb.toString();
 	}
@@ -88,15 +100,15 @@ public class Reservation implements java.io.Serializable {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (orderNumber == null || obj == null || getClass() != obj.getClass())
+		if (ordernumber == null || obj == null || getClass() != obj.getClass())
 			return false;
 		Reservation toCompare = (Reservation) obj;
-		return orderNumber.equals(toCompare.orderNumber);
+		return ordernumber.equals(toCompare.ordernumber);
 	}
 
 	@Override
 	public int hashCode() {
-		return orderNumber == null ? 0 : orderNumber.hashCode();
+		return ordernumber == null ? 0 : ordernumber.hashCode();
 	}
 
 }
