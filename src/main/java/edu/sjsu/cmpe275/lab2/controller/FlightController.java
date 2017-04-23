@@ -53,6 +53,7 @@ public class FlightController {
 		flight.setToDestination(to);
 		flight.setDepartureTime(new Date(departureTime));
 		flight.setArrivalTime(new Date(arrivalTime));
+		flight.setDescription(description);
 		flight.setSeatsLeft(capacity);
 		flight.setPlane(plane);
 
