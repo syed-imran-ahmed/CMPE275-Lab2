@@ -72,18 +72,16 @@ public class FlightController {
 		logger.debug("Found Flight: " + flight);
 		return new ResponseEntity<Flight>(flight, HttpStatus.OK);
 	}
-
-//	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-//	public ResponseEntity<Void> deleteEmployee(@PathVariable("id") Long id) {
-//		Employee employee = empService.getById(id);
-//		if (employee == null) {
-//			logger.debug("Employee with id " + id + " does not exists");
-//			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-//		} else {
-//			empService.delete(id);
-//			logger.debug("Employee with id " + id + " deleted");
-//			return new ResponseEntity<Void>(HttpStatus.GONE);
-//		}
-//	}
-
+	
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<String> deleteFlight(@PathVariable("id") String id) {
+		Flight flight = flightService.getById(id);
+		if (flight == null) {
+			logger.debug("Flight with id " + id + " does not exist.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight number "+id+ " doesn't exist");
+		}
+		flightService.delete(id);
+		logger.debug("Deleted Flight: " + flight);
+		return ResponseEntity.status(HttpStatus.OK).body("Flight number "+id+" has been deleted successfully");
+	}
 }
