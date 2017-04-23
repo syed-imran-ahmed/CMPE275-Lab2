@@ -79,6 +79,9 @@ public class FlightController {
 		if (flight == null) {
 			logger.debug("Flight with id " + id + " does not exist.");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight number "+id+ " doesn't exist");
+		}else if(flight.getSeatsLeft() != flight.getPlane().getCapacity()){
+			logger.debug("Flight with id " + id + " still has some reservations.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight number "+id+ " still has some reservations.");
 		}
 		flightService.delete(id);
 		logger.debug("Deleted Flight: " + flight);
