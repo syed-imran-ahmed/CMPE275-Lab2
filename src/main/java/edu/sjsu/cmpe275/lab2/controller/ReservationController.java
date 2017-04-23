@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,8 +56,20 @@ public class ReservationController {
 			totalPrice += flight.getPrice();
 		}
 		reservation.setPrice(totalPrice);
+		reservation.setFlights(flights);
 		reservationService.save(reservation);
 		logger.debug("Created reservation " + reservation.getOrdernumber());
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.CREATED);
+	}
+	
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	public ResponseEntity<Reservation> getReservation(@PathVariable("id") Long id) {
+		Reservation reservation = reservationService.getById(id);
+		if (reservation == null) {
+			logger.debug("Flight with id " + id + " does not exist.");
+			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
+		}
+		logger.debug("Found Flight: " + reservation);
+		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
 }

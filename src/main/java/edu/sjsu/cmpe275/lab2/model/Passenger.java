@@ -3,7 +3,6 @@ package edu.sjsu.cmpe275.lab2.model;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,39 +10,31 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author Imran
  */
 @Entity
 @Table(name = "passenger")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class Passenger implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", unique = true, nullable = false)
+	
+	//@Column(name = "id", unique = true, nullable = false)
 	private Long id;
-
-	@Column(name = "firstname", length = 50)
 	private String firstname;
-
-	@Column(name = "lastname", length = 50)
 	private String lastname;
-
-	@Column(name = "age")
 	private int age;
-	
-	@Column(name = "gender")
 	private String gender;
-	
-	@Column(name = "phone",unique = true, nullable = false)
 	private String phone;
 
-	@OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL)
-	@JsonManagedReference
+	//@OneToMany(cascade = CascadeType.ALL)
+	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
+	
 	private List<Reservation> reservations;
 
 	public Passenger() {
@@ -70,6 +61,9 @@ public class Passenger implements java.io.Serializable {
 		this.phone = phone;
 	}
 
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
 		return this.id;
 	}
@@ -118,7 +112,7 @@ public class Passenger implements java.io.Serializable {
 		this.phone = phone;
 	}
 	
-
+	@OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL)
 	public List<Reservation> getReservations() {
 		return reservations;
 	}

@@ -14,12 +14,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author Imran
  */
 @Entity
 @Table(name = "reservation")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "ordernumber")
 public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;
@@ -60,7 +63,6 @@ public class Reservation implements java.io.Serializable {
 	}
 
 	@ManyToOne
-	@JsonBackReference
 	@JoinColumn(name = "passenger_id")
 	public Passenger getPassenger() {
 		return passenger;
