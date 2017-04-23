@@ -5,43 +5,27 @@ import java.util.List;
 import javax.persistence.*;
 
 /**
- * 
  * @author Imran
- *
  */
-
 @Entity
 @Table(name = "reservation")
 public class Reservation implements java.io.Serializable {
 
-	//private static final long serialVersionUID = 4910225916550731446L;
+	private static final long serialVersionUID = 2L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", unique = true, nullable = false)
-	private Long id;
-	
-	
-	@Column(name = "orderNumber", unique = true, nullable = false, length =50)
-	private String orderNumber;
-
-	@Column(name = "price", length = 50)
-	private int price;
-
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number") })
-	private List<Flight> flights;
-
+	private Long orderNumber;
 	private Passenger passenger;
+	private int price;
+	private List<Flight> flights;
 
 	public Reservation() {
 	}
 
-	public Reservation(String orderNumber) {
+	public Reservation(Long orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
-	public Reservation(String orderNumber, int price, List<Flight> flights, Passenger passenger) {
+	public Reservation(Long orderNumber, int price, List<Flight> flights, Passenger passenger) {
 		this.orderNumber = orderNumber;
 		this.price = price;
 		this.flights = flights;	
@@ -54,14 +38,24 @@ public class Reservation implements java.io.Serializable {
 		this.passenger = passenger;
 	}
 
-	
-
-	public String getorderNumber() {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	public Long getOrderNumber() {
 		return orderNumber;
 	}
 
-	public void setorderNumber(String orderNumber) {
+	public void setOrderNumber(Long orderNumber) {
 		this.orderNumber = orderNumber;
+	}
+
+	//@OneToOne(cascade = CascadeType.ALL)
+	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
+	public Passenger getPassenger() {
+		return passenger;
+	}
+
+	public void setPassenger(Passenger passenger) {
+		this.passenger = passenger;
 	}
 
 	public int getPrice() {
@@ -72,35 +66,15 @@ public class Reservation implements java.io.Serializable {
 		this.price = price;
 	}
 
-//	public List<Flight> getFlights() {
-//		return flights;
-//	}
-//
-//	public void setFlights(List<Flight> flights) {
-//		this.flights = flights;
-//	}
-	
-	
-	//@OneToMany(cascade = {CascadeType.ALL})
-    //@JoinTable(name = "passenger_reservation", joinColumns = @JoinColumn(name = "passenger_id"), inverseJoinColumns = @JoinColumn(name = "reservation_id"))
-	//@OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number") })
     public List<Flight> getFlights() {
         return flights;
     }
 
-    public void setRoles(List<Flight> flights) {
+    public void setFlights(List<Flight> flights) {
         this.flights = flights;
     }
-	
-	
-
-	public Passenger getPassenger() {
-		return passenger;
-	}
-
-	public void setPassenger(Passenger passenger) {
-		this.passenger = passenger;
-	}
 
 	@Override
 	public String toString() {
