@@ -27,7 +27,7 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public Flight getById(Serializable id) {
-		return flightRepository.findOne((Long) id);
+		return flightRepository.findOne((String) id);
 	}
 
 	@Override
@@ -37,7 +37,6 @@ public class FlightServiceImpl implements FlightService {
 
 	@Override
 	public void delete(Serializable id) {
-		flightRepository.delete((Long) id);
+		flightRepository.delete((String) id);
 	}
-
 }

@@ -37,60 +37,40 @@ public class FlightController {
 			@RequestParam("price") int price,
 			@RequestParam("from") String from,
 			@RequestParam("to") String to,
-			@RequestParam("departureTime") Date departureTime,
-			@RequestParam("arrivalTime") Date arrivalTime,
+			@RequestParam("departureTime") Long departureTime,
+			@RequestParam("arrivalTime") Long arrivalTime,
 			@RequestParam("description") String description,
 			@RequestParam("capacity") int capacity,
 			@RequestParam("model") String model,
 			@RequestParam("manufacturer") String manufacturer,
 			@RequestParam("yearOfManufacture") int yearOfManufacture) {
-		
-		
+
 		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
-		Flight flight = new Flight(flightNumber,price,from,to,departureTime,arrivalTime,capacity,description, plane);
+		Flight flight = new Flight();
+		flight.setNumber(flightNumber);
+		flight.setPrice(price);
+		flight.setFromOrigin(from);
+		flight.setToDestination(to);
+		flight.setDepartureTime(new Date(departureTime));
+		flight.setArrivalTime(new Date(arrivalTime));
+		flight.setSeatsLeft(capacity);
+		flight.setPlane(plane);
+
 		flightService.save(flight);
-		logger.debug("Added:: " + flight);
+		logger.debug("Created/updated flight " + flight);
 		return new ResponseEntity<Flight>(flight, HttpStatus.CREATED);
 	}
 
-
-//	@RequestMapping(method = RequestMethod.PUT)
-//	public ResponseEntity<Void> updateEmployee(@RequestBody Employee employee) {
-//		Employee existingEmp = empService.getById(employee.getId());
-//		if (existingEmp == null) {
-//			logger.debug("Employee with id " + employee.getId() + " does not exists");
-//			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-//		} else {
-//			empService.save(employee);
-//			return new ResponseEntity<Void>(HttpStatus.OK);
-//		}
-//	}
-
-
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Flight> getEmployee(@PathVariable("id") Long id) {
+	public ResponseEntity<Flight> getFlight(@PathVariable("id") String id) {
 		Flight flight = flightService.getById(id);
 		if (flight == null) {
-			logger.debug("Passenger with id " + id + " does not exists");
+			logger.debug("Flight with id " + id + " does not exist.");
 			return new ResponseEntity<Flight>(HttpStatus.NOT_FOUND);
 		}
-		logger.debug("Found Employee:: " + flight);
+		logger.debug("Found Flight: " + flight);
 		return new ResponseEntity<Flight>(flight, HttpStatus.OK);
 	}
-
-
-//	@RequestMapping(method = RequestMethod.GET)
-//	public ResponseEntity<List<Employee>> getAllEmployees() {
-//		List<Employee> employees = empService.getAll();
-//		if (employees.isEmpty()) {
-//			logger.debug("Employees does not exists");
-//			return new ResponseEntity<List<Employee>>(HttpStatus.NO_CONTENT);
-//		}
-//		logger.debug("Found " + employees.size() + " Employees");
-//		logger.debug(Arrays.toString(employees.toArray()));
-//		return new ResponseEntity<List<Employee>>(employees, HttpStatus.OK);
-//	}
-
 
 //	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 //	public ResponseEntity<Void> deleteEmployee(@PathVariable("id") Long id) {

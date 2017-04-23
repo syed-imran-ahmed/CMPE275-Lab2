@@ -11,6 +11,6 @@ import edu.sjsu.cmpe275.lab2.model.Flight;
  */
 
 @Repository
-public interface FlightRepository extends JpaRepository<Flight, Long> {
+public interface FlightRepository extends JpaRepository<Flight, String> {
 
 }
