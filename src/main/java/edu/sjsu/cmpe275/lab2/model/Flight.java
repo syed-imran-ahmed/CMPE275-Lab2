@@ -1,5 +1,6 @@
 package edu.sjsu.cmpe275.lab2.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -127,14 +128,15 @@ public class Flight implements java.io.Serializable {
 	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id", referencedColumnName="id") })
 	public List<Passenger> getPassengers() {
 		
+		List<Passenger> pas = new ArrayList<Passenger>();
 		if(getReservations()!=null)
 		{
 			for(Reservation res:getReservations())
 			{
-				passengers.add(res.getPassenger());
+				pas.add(res.getPassenger());
 			}
 		}
-		return passengers;
+		return pas;
 	}
 
 	public void setPassengers(List<Passenger> passengers) {
