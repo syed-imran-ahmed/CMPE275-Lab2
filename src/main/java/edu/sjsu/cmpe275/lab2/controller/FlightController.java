@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.model.Plane;
+import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 
 /**
@@ -62,6 +65,7 @@ public class FlightController {
 		return new ResponseEntity<Flight>(flight, HttpStatus.CREATED);
 	}
 
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Flight> getFlight(@PathVariable("id") String id) {
 		Flight flight = flightService.getById(id);

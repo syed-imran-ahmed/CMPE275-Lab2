@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -27,16 +28,22 @@ public class Passenger implements java.io.Serializable {
 
 	
 	//@Column(name = "id", unique = true, nullable = false)
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private Long id;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String firstname;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String lastname;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private int age;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String gender;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String phone;
 
 	//@OneToMany(cascade = CascadeType.ALL)
 	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
-	
+
 	private List<Reservation> reservations;
 	private List<Flight> flights;
 

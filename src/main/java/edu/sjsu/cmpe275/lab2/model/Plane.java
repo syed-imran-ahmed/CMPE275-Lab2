@@ -2,6 +2,8 @@ package edu.sjsu.cmpe275.lab2.model;
 
 import javax.persistence.Embeddable;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 /**
  * 
  * @author Imran
@@ -13,9 +15,13 @@ public class Plane implements java.io.Serializable {
 
 	private static final long serialVersionUID = 4L;
 
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private int capacity;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String model;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private String manufacturer;
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	private int yearOfManufacture;
 
 	public Plane() {

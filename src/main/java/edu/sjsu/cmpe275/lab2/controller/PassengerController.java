@@ -57,7 +57,7 @@ public class PassengerController {
 
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Passenger> getEmployee(@PathVariable("id") Long id) {
+	public ResponseEntity<Passenger> getPassenger(@PathVariable("id") Long id) {
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
 			logger.debug("Passenger with id " + id + " does not exists");
