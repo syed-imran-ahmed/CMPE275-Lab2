@@ -10,8 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 
@@ -35,7 +36,8 @@ public class Flight implements java.io.Serializable {
 	private String description;
 	@Embedded
 	private Plane plane;
-	//private List<Passenger> passengers;
+	private List<Passenger> passengers;
+
 	private List<Reservation> reservations;
 
     @Id
@@ -112,12 +114,33 @@ public class Flight implements java.io.Serializable {
 	}
 
 	@ManyToMany(mappedBy="flights")
+	@JsonIgnore
 	public List<Reservation> getReservations() {
 		return reservations;
 	}
 	
 	public void setReservations(List<Reservation> reservations) {
 		this.reservations = reservations;
+	}
+	
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id", referencedColumnName="id") })
+	public List<Passenger> getPassengers() {
+		
+		if(getReservations()!=null)
+		{
+			for(Reservation res:getReservations())
+			{
+				passengers.add(res.getPassenger());
+			}
+		}
+		return passengers;
+	}
+
+	public void setPassengers(List<Passenger> passengers) {
+		
+		
+		this.passengers = passengers;
 	}
 	
 //	@OneToMany(cascade = CascadeType.ALL)

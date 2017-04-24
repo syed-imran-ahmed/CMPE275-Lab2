@@ -7,10 +7,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -36,6 +38,7 @@ public class Passenger implements java.io.Serializable {
 	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
 	
 	private List<Reservation> reservations;
+	private List<Flight> flights;
 
 	public Passenger() {
 	}
@@ -121,6 +124,16 @@ public class Passenger implements java.io.Serializable {
 		this.reservations = reservations;
 	}
 
+	@ManyToMany(mappedBy="passengers")
+	@JsonIgnore
+	public List<Flight> getFlights() {
+		return flights;
+	}
+
+	public void setFlights(List<Flight> flights) {
+		this.flights = flights;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
