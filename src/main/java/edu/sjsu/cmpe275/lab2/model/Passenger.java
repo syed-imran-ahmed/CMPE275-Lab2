@@ -3,6 +3,7 @@ package edu.sjsu.cmpe275.lab2.model;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,22 +30,22 @@ public class Passenger implements java.io.Serializable {
 
 	
 	//@Column(name = "id", unique = true, nullable = false)
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private Long id;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String firstname;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String lastname;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int age;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String gender;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String phone;
 
 	//@OneToMany(cascade = CascadeType.ALL)
 	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
-
+	@JsonView({Views.ProjectRelevantFieldsInPassenger.class})
 	private List<Reservation> reservations;
 	private List<Flight> flights;
 
@@ -114,6 +116,7 @@ public class Passenger implements java.io.Serializable {
 		this.gender = gender;
 	}
 
+	@Column(unique=true)
 	public String getPhone() {
 		return phone;
 	}

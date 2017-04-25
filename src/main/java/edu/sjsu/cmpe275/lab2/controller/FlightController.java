@@ -34,6 +34,7 @@ public class FlightController {
 	@Autowired
 	FlightService flightService;
 
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value ="/{flightNumber}", method = RequestMethod.POST)
 	public ResponseEntity<Flight> addFlight(
 			@PathVariable ("flightNumber") String flightNumber,

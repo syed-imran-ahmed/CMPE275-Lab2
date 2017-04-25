@@ -29,6 +29,11 @@ public class PassengerServiceImpl implements PassengerService {
 	public Passenger getById(Serializable id) {
 		return passengerRepository.findOne((Long) id);
 	}
+	
+	@Override
+	public List<Passenger> getByPhone(Serializable phone){
+		return passengerRepository.findByPhone((String) phone);
+	}
 
 	@Override
 	public List<Passenger> getAll() {

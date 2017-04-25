@@ -28,28 +28,28 @@ public class Flight implements java.io.Serializable {
 
 	private static final long serialVersionUID = 3L;
 
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class})
+	
 	private String number;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int price;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String from;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String to;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private Date departureTime;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private Date arrivalTime;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int seatsLeft;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String description;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	@Embedded
 	private Plane plane;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class})
 	private List<Passenger> passengers;
-
 	private List<Reservation> reservations;
 
     @Id

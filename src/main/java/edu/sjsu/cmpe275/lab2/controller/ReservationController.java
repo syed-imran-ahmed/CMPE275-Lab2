@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.model.Passenger;
 import edu.sjsu.cmpe275.lab2.model.Reservation;
+import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 import edu.sjsu.cmpe275.lab2.service.PassengerService;
 import edu.sjsu.cmpe275.lab2.service.ReservationService;
@@ -62,6 +65,7 @@ public class ReservationController {
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.CREATED);
 	}
 	
+	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<Reservation> getReservation(@PathVariable("id") Long id) {
 		Reservation reservation = reservationService.getById(id);

@@ -15,13 +15,13 @@ public class Plane implements java.io.Serializable {
 
 	private static final long serialVersionUID = 4L;
 
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int capacity;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String model;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String manufacturer;
-	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int yearOfManufacture;
 
 	public Plane() {

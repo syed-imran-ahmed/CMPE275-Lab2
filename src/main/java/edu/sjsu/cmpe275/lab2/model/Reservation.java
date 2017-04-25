@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -27,9 +28,13 @@ public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;
 
+	@JsonView({Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private Long ordernumber;
+	@JsonView({Views.ProjectOnlyFlightFieldsInReservation.class})
 	private Passenger passenger;
+	@JsonView({Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private int price;
+	@JsonView({Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private List<Flight> flights;
 
 	public Reservation() {
