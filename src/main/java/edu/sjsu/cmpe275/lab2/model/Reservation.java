@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  */
 @Entity
 @Table(name = "reservation")
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="ordernumber")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="ordernumber")
 public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;

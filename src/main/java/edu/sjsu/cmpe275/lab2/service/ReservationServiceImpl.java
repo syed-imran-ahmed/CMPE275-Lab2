@@ -22,7 +22,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Override
 	public Reservation getById(Serializable id) {
-		return reservationRepository.getOne((Long) id);
+		return reservationRepository.findOne((Long) id);
 	}
 
 	@Override

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.collection.internal.PersistentBag;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -20,9 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
 
@@ -66,34 +65,19 @@ public class PassengerController {
 			}
 			catch(DataAccessException e)
 			{
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode rootNode = mapper.createObjectNode();
-				JsonNode childNodes = mapper.createObjectNode();
-				((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
-				((ObjectNode) childNodes).put("msg", e.getLocalizedMessage());
-						
-				((ObjectNode) rootNode).set("BadRequest", childNodes);
-				String jsonString = mapper.writeValueAsString(rootNode);
+				ErrorJSON err = new ErrorJSON(e.getMessage());
 				HttpHeaders responseHeaders = new HttpHeaders();
-			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-						
-				return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.BAD_REQUEST);
+			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);		
+				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 			}
 		}
 		else
 		{
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.createObjectNode();
-			JsonNode childNodes = mapper.createObjectNode();
-			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
-			((ObjectNode) childNodes).put("msg", "another passenger with the same phone number already exists.");
-					
-			((ObjectNode) rootNode).set("BadRequest", childNodes);
-			String jsonString = mapper.writeValueAsString(rootNode);
+			String errMsg = "another passenger with the same phone number already exists.";
+			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-					
-			return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -110,20 +94,12 @@ public class PassengerController {
 		Passenger existingPassenger = passengerService.getById(id);
 		
 		if (existingPassenger == null) {
-			String errMsg = "Employee with id " + id + " does not exists";
-			logger.debug("Employee with id " + id + " does not exists");
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.createObjectNode();
-			JsonNode childNodes = mapper.createObjectNode();
-			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
-			((ObjectNode) childNodes).put("msg", errMsg);
-					
-			((ObjectNode) rootNode).set("BadRequest", childNodes);
-			String jsonString = mapper.writeValueAsString(rootNode);
+			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
+			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-					
-			return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.NOT_FOUND);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 	
 		} else {
 			existingPassenger.setAge(age);
@@ -137,32 +113,28 @@ public class PassengerController {
 	}
 
 	@JsonView(Views.ProjectRelevantFieldsInPassenger.class)
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET,produces={MediaType.APPLICATION_JSON_VALUE, 
-            MediaType.APPLICATION_XML_VALUE})
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET,produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<?> getPassengerInXML(
 			@PathVariable("id") Long id,
 			@RequestParam(value = "xml", required = false) boolean xml,
 			@RequestParam(value = "json", required = false) boolean json) throws JsonProcessingException {
+		
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
-			logger.debug("Passenger with id " + id + " does not exists");
-			return new ResponseEntity<Passenger>(HttpStatus.NOT_FOUND);
+			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
+			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 		}
 
-		XStream xs = new XStream();
-		  xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
-		  xs.alias("passenger", Passenger.class);
-		  xs.alias("flight", Flight.class);
-		  xs.alias("reservation", Reservation.class);
-		  
-		  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
-		  xs.addDefaultImplementation(PersistentBag.class, List.class);
-		  xs.addDefaultImplementation(Timestamp.class, Date.class);
+		
 		
 		HttpHeaders responseHeaders;
 		if(xml)
 		{
-			ObjectMapper mapper = new ObjectMapper();
+			//ObjectMapper mapper = new ObjectMapper();
 			
 //			
 //			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
@@ -171,6 +143,19 @@ public class PassengerController {
 //			
 //			JSONObject jsonVal = new JSONObject(jsonString);
 //			String xmlVal = XML.toString(jsonVal);
+			XStream xs = new XStream();
+			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+			xs.alias("passenger", Passenger.class);
+			xs.alias("flight", Flight.class);
+			xs.alias("reservation", Reservation.class);
+			
+			  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+			xs.addDefaultImplementation(PersistentBag.class, List.class);
+			xs.addDefaultImplementation(Timestamp.class, Date.class);
+			  
+			xs.omitField(Reservation.class, "passenger");
+			xs.omitField(Flight.class, "reservations");
+			xs.omitField(Flight.class, "passengers");
 			
 			responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
@@ -187,26 +172,25 @@ public class PassengerController {
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deletePassenger(@PathVariable("id") Long id) throws JsonProcessingException {
-		Passenger employee = passengerService.getById(id);
-		if (employee == null) {
-			String errMsg = "Employee with id " + id + " does not exists";
-			logger.debug("Employee with id " + id + " does not exists");
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.createObjectNode();
-			JsonNode childNodes = mapper.createObjectNode();
-			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
-			((ObjectNode) childNodes).put("msg", errMsg);
-					
-			((ObjectNode) rootNode).set("BadRequest", childNodes);
-			String jsonString = mapper.writeValueAsString(rootNode);
+		Passenger passenger = passengerService.getById(id);
+		if (passenger == null) {
+			String errMsg = "Passenger with id " + id + " does not exists";
+			logger.debug("Passenger with id " + id + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-		    return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.NOT_FOUND);
+		    return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 			
 		} else {
 			passengerService.delete(id);
-			logger.debug("Passenger with id " + id + " deleted");
-			return new ResponseEntity<Passenger>(HttpStatus.GONE);
+			String errMsg = "Passenger with id " + id + " is deleted successfully";
+			logger.debug("Passenger with id " + id + " is deleted successfully");
+			ErrorJSON err = new ErrorJSON(errMsg);			
+			JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
+			String xmlVal = XML.toString(jsonVal);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+			return new ResponseEntity<>(xmlVal,responseHeaders,HttpStatus.OK);
 		}
 	}
 

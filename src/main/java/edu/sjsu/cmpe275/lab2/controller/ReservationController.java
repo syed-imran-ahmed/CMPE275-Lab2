@@ -1,9 +1,14 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.collection.internal.PersistentBag;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
 
 import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.model.Passenger;
@@ -49,16 +56,47 @@ public class ReservationController {
 
 	@RequestMapping(method = RequestMethod.POST)
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
-	public ResponseEntity<Reservation> makeReservation(
+	public ResponseEntity<?> makeReservation(
 			@RequestParam("passengerId") Long passengerId,
 			@RequestParam("flightList") List<String> flightNumbers
-			) {
+			) throws JsonProcessingException {
 
 		Passenger passenger = passengerService.getById(passengerId);
+		if (passenger == null) {
+			String errMsg = "Sorry, the requested passenger with id " + passengerId + " does not exists";
+			logger.debug("Sorry, the requested passenger with id " + passengerId + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+		}
+		
 		List<Flight> flights = new ArrayList<Flight>();
 		for(String flightNumber : flightNumbers){
-			flights.add(flightService.getById(flightNumber));
+			Flight flight = flightService.getById(flightNumber);
+			if (flight == null) {
+				String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exists";
+				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exists");
+				ErrorJSON err = new ErrorJSON(errMsg);
+				HttpHeaders responseHeaders = new HttpHeaders();
+			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
+				return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			}
+			
+			if(flight.getSeatsLeft()<=0)
+			{
+				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
+				ErrorJSON err = new ErrorJSON(errMsg);
+				HttpHeaders responseHeaders = new HttpHeaders();
+			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+				return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			}
+			else{
+				flight.setSeatsLeft(flight.getPlane().getCapacity()-1);
+				flights.add(flight);
+			}
 		}
+		
 		Reservation reservation = new Reservation();
 		reservation.setPassenger(passenger);
 		int totalPrice = 0;
@@ -69,43 +107,65 @@ public class ReservationController {
 		reservation.setFlights(flights);
 		reservationService.save(reservation);
 		logger.debug("Created reservation " + reservation.getOrdernumber());
-		return new ResponseEntity<Reservation>(reservation, HttpStatus.CREATED);
+		
+		XStream xs = new XStream();
+		xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+		xs.alias("passenger", Passenger.class);
+		xs.alias("flight", Flight.class);
+		xs.alias("reservation", Reservation.class);
+		
+		
+		xs.omitField(Passenger.class, "reservations");
+		xs.omitField(Flight.class, "passengers");
+		xs.omitField(Flight.class, "reservations");
+		xs.omitField(Passenger.class, "flights");
+		
+		  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+		xs.addDefaultImplementation(PersistentBag.class, List.class);
+		xs.addDefaultImplementation(Timestamp.class, Date.class);
+	
+		HttpHeaders responseHeaders = new HttpHeaders();
+	    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+		return new ResponseEntity<>(xs.toXML(reservation),responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Reservation> getReservation(@PathVariable("id") Long id) {
-		Reservation reservation = reservationService.getById(id);
+	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.GET)
+	public ResponseEntity<?> getReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
+		Reservation reservation = reservationService.getById(ordernumber);
 		if (reservation == null) {
-			logger.debug("Flight with id " + id + " does not exist.");
-			return new ResponseEntity<Reservation>(HttpStatus.NOT_FOUND);
+			String errMsg = "Reserveration with number " + ordernumber + " does not exists";
+			logger.debug("Reserveration with number " + ordernumber + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders, HttpStatus.NOT_FOUND);
 		}
 		logger.debug("Found Flight: " + reservation);
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<?> deleteReservation(@PathVariable("id") Long id) throws JsonProcessingException {
-		Reservation reservation = reservationService.getById(id);
+	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
+		Reservation reservation = reservationService.getById(ordernumber);
 		if (reservation == null) {
-			String errMsg = "Reservation with order Number " + id + " does not exists";
-			logger.debug("Employee with id " + id + " does not exists");
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.createObjectNode();
-			JsonNode childNodes = mapper.createObjectNode();
-			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
-			((ObjectNode) childNodes).put("msg", errMsg);
-					
-			((ObjectNode) rootNode).set("BadRequest", childNodes);
-			String jsonString = mapper.writeValueAsString(rootNode);
+			String errMsg = "Reserveration with number " + ordernumber + " does not exists";
+			logger.debug("Reserveration with number " + ordernumber + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-		    return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.NOT_FOUND);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders, HttpStatus.NOT_FOUND);
 			
 		} else {
-			reservationService.delete(id);
-			logger.debug("Reservation with order number " + id + " deleted");
-			return new ResponseEntity<Reservation>(HttpStatus.GONE);
+			reservationService.delete(ordernumber);
+			String errMsg = "Reservation with number " + ordernumber + " is canceled successfully";
+			logger.debug("Reservation with number " + ordernumber + " is canceled successfully");
+			ErrorJSON err = new ErrorJSON(errMsg);			
+			JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
+			String xmlVal = XML.toString(jsonVal);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+			return new ResponseEntity<>(xmlVal,responseHeaders,HttpStatus.OK);
 		}
 	}
 
