@@ -1,6 +1,11 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.hibernate.collection.internal.PersistentBag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -19,8 +24,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
 
+import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.model.Passenger;
+import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.PassengerService;
 
@@ -134,19 +142,39 @@ public class PassengerController {
 	public ResponseEntity<?> getPassengerInXML(
 			@PathVariable("id") Long id,
 			@RequestParam(value = "xml", required = false) boolean xml,
-			@RequestParam(value = "json", required = false) boolean json) {
+			@RequestParam(value = "json", required = false) boolean json) throws JsonProcessingException {
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
 			logger.debug("Passenger with id " + id + " does not exists");
 			return new ResponseEntity<Passenger>(HttpStatus.NOT_FOUND);
 		}
+
 		XStream xs = new XStream();
+		  xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+		  xs.alias("passenger", Passenger.class);
+		  xs.alias("flight", Flight.class);
+		  xs.alias("reservation", Reservation.class);
+		  
+		  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+		  xs.addDefaultImplementation(PersistentBag.class, List.class);
+		  xs.addDefaultImplementation(Timestamp.class, Date.class);
+		
 		HttpHeaders responseHeaders;
 		if(xml)
 		{
+			ObjectMapper mapper = new ObjectMapper();
+			
+//			
+//			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+//			//mapper.setVisibility(PropertyAccessor.FIELD, Visibility.NONE);
+//			String jsonString = mapper.writeValueAsString(passenger);
+//			
+//			JSONObject jsonVal = new JSONObject(jsonString);
+//			String xmlVal = XML.toString(jsonVal);
+			
 			responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
-		    return new ResponseEntity<String>(xs.toXML(passenger),responseHeaders, HttpStatus.OK);
+		    return new ResponseEntity<>(xs.toXML(passenger),responseHeaders, HttpStatus.OK);
 		}
 		else
 		{

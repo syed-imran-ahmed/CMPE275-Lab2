@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -23,7 +24,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  */
 @Entity
 @Table(name = "reservation")
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "ordernumber")
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="ordernumber")
 public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;
@@ -85,7 +86,13 @@ public class Reservation implements java.io.Serializable {
 		this.price = price;
 	}
 
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade  = 
+        { 
+                CascadeType.DETACH, 
+                CascadeType.MERGE, 
+                CascadeType.REFRESH, 
+                CascadeType.PERSIST,
+        })
 	@JoinTable(name = "reservation_flight", joinColumns = { @JoinColumn(name = "reservation_ordernumber", referencedColumnName="ordernumber") }, inverseJoinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") })
     public List<Flight> getFlights() {
         return flights;

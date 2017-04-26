@@ -11,19 +11,16 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * @author Imran
  */
 @Entity
 @Table(name = "passenger")
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
 public class Passenger implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -125,7 +122,7 @@ public class Passenger implements java.io.Serializable {
 		this.phone = phone;
 	}
 	
-	@OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL)
+	@OneToMany(orphanRemoval=true,mappedBy = "passenger", cascade = CascadeType.ALL)
 	public List<Reservation> getReservations() {
 		return reservations;
 	}

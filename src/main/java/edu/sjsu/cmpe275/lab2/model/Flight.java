@@ -135,7 +135,14 @@ public class Flight implements java.io.Serializable {
 		this.reservations = reservations;
 	}
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade  = 
+        { 
+                CascadeType.DETACH, 
+                CascadeType.MERGE, 
+                CascadeType.REFRESH, 
+                CascadeType.PERSIST,
+                CascadeType.REMOVE
+        })
 	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id", referencedColumnName="id") })
 	public List<Passenger> getPassengers() {
 		

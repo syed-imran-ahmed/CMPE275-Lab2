@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.model.Passenger;
@@ -42,6 +48,7 @@ public class ReservationController {
 	ReservationService reservationService;
 
 	@RequestMapping(method = RequestMethod.POST)
+	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	public ResponseEntity<Reservation> makeReservation(
 			@RequestParam("passengerId") Long passengerId,
 			@RequestParam("flightList") List<String> flightNumbers
@@ -76,4 +83,31 @@ public class ReservationController {
 		logger.debug("Found Flight: " + reservation);
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<?> deleteReservation(@PathVariable("id") Long id) throws JsonProcessingException {
+		Reservation reservation = reservationService.getById(id);
+		if (reservation == null) {
+			String errMsg = "Reservation with order Number " + id + " does not exists";
+			logger.debug("Employee with id " + id + " does not exists");
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode rootNode = mapper.createObjectNode();
+			JsonNode childNodes = mapper.createObjectNode();
+			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
+			((ObjectNode) childNodes).put("msg", errMsg);
+					
+			((ObjectNode) rootNode).set("BadRequest", childNodes);
+			String jsonString = mapper.writeValueAsString(rootNode);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+		    return new ResponseEntity<String>(jsonString,responseHeaders,HttpStatus.NOT_FOUND);
+			
+		} else {
+			reservationService.delete(id);
+			logger.debug("Reservation with order number " + id + " deleted");
+			return new ResponseEntity<Reservation>(HttpStatus.GONE);
+		}
+	}
+
+	
 }
