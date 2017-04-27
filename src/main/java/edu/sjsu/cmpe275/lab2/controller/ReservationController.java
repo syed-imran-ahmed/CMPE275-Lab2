@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -56,7 +57,7 @@ public class ReservationController {
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	public ResponseEntity<?> makeReservation(
 			@RequestParam("passengerId") Long passengerId,
-			@RequestParam("flightList") List<String> flightNumbers
+			@RequestParam("flightLists") List<String> flightNumbers
 			) throws JsonProcessingException {
 
 		Passenger passenger = passengerService.getById(passengerId);
@@ -192,7 +193,7 @@ public class ReservationController {
 		}
 	}
 
-	
+	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> searchReservation(
 			@RequestParam(value="passengerId",required = false) Long passengerId,
@@ -210,11 +211,98 @@ public class ReservationController {
 			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 		}
 		
-		Reservation existingReservation = reservationService.getById(1);
+		List<Reservation> existingReservations = reservationService.getAll();
+		List<Reservation> reservations = new ArrayList<Reservation>(existingReservations);
+		Iterator<Reservation> i = reservations.iterator();
 		
-		
-		
-		return new ResponseEntity<Reservation>(existingReservation, HttpStatus.OK);
+			if(passengerId!=null){
+				while (i.hasNext()) {
+					Reservation reservation = i.next();
+					if(reservation.getPassenger().getId()!=passengerId)
+					{
+						i.remove();
+					}
+				}
+			}
+			
+			
+			Iterator<Reservation> j = reservations.iterator();
+			if(flightNumber!=null)
+			{
+				while (j.hasNext()) {
+					Reservation reservation = j.next();
+					int count =0;
+					for(Flight flight:reservation.getFlights())
+					{
+						if(flight.getNumber().equals(flightNumber))
+						{
+							count++;
+						}
+					}
+					if(count==0)
+						j.remove();
+				}
+			}
+			
+			
+			Iterator<Reservation> k = reservations.iterator();
+			if(from!=null)
+			{
+				while (k.hasNext()) {
+					Reservation reservation = k.next();
+					int count =0;
+					for(Flight flight:reservation.getFlights())
+					{
+						if(flight.getFromOrigin().equals(from))
+						{
+							count++;
+						}
+					}
+					if(count==0)
+						k.remove();
+				}
+			}
+			
+			Iterator<Reservation> l = reservations.iterator();
+			if(to!=null)
+			{
+				while (l.hasNext()) {
+					Reservation reservation = l.next();
+					int count =0;
+					for(Flight flight:reservation.getFlights())
+					{
+						if(flight.getToDestination().equals(to))
+						{
+							count++;
+						}
+					}
+					if(count==0)
+						l.remove();
+				}
+			}
+			
+			
+			XStream xs = new XStream();
+			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+			xs.setMode(XStream.NO_REFERENCES);
+			xs.alias("passenger", Passenger.class);
+			xs.alias("flight", Flight.class);
+			xs.alias("reservation", Reservation.class);
+			
+			
+			xs.omitField(Passenger.class, "reservations");
+			xs.omitField(Flight.class, "passengers");
+			xs.omitField(Flight.class, "reservations");
+			xs.omitField(Passenger.class, "flights");
+			
+			  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+			xs.addDefaultImplementation(PersistentBag.class, List.class);
+			xs.addDefaultImplementation(Timestamp.class, Date.class);
+			
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+			return new ResponseEntity<>(xs.toXML(reservations),responseHeaders, HttpStatus.CREATED);
+			
 		
 	}
 	
