@@ -166,7 +166,7 @@ public class PassengerController {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode rootNode = mapper.createObjectNode();
 			JsonNode childNodes = mapper.createObjectNode();
-			((ObjectNode) childNodes).put("code", HttpStatus.BAD_REQUEST.toString());
+			((ObjectNode) childNodes).put("code", HttpStatus.NOT_FOUND.toString());
 			((ObjectNode) childNodes).put("msg", errMsg);
 					
 			((ObjectNode) rootNode).set("BadRequest", childNodes);
@@ -178,7 +178,7 @@ public class PassengerController {
 		} else {
 			passengerService.delete(id);
 			logger.debug("Passenger with id " + id + " deleted");
-			return new ResponseEntity<Passenger>(HttpStatus.GONE);
+			return new ResponseEntity<Passenger>(HttpStatus.OK);
 		}
 	}
 
