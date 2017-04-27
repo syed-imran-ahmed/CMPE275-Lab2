@@ -1,5 +1,7 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -41,22 +43,27 @@ public class FlightController {
 			@RequestParam("price") int price,
 			@RequestParam("from") String from,
 			@RequestParam("to") String to,
-			@RequestParam("departureTime") Long departureTime,
-			@RequestParam("arrivalTime") Long arrivalTime,
+			@RequestParam("departureTime") String departureTime,
+			@RequestParam("arrivalTime") String arrivalTime,
 			@RequestParam("description") String description,
 			@RequestParam("capacity") int capacity,
 			@RequestParam("model") String model,
 			@RequestParam("manufacturer") String manufacturer,
-			@RequestParam("yearOfManufacture") int yearOfManufacture) {
+			@RequestParam("yearOfManufacture") int yearOfManufacture) throws ParseException {
 
+//		departureTime = departureTime.substring(0,10)+" "+departureTime.substring(11);
+//		arrivalTime = arrivalTime.substring(0,10)+" "+arrivalTime.substring(11);
+//		Date depTime = new SimpleDateFormat("yyyy-MM-dd HH").parse(departureTime);
+//		Date arrTime = new SimpleDateFormat("yyyy-MM-dd HH").parse(arrivalTime);
+		
 		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
 		Flight flight = new Flight();
 		flight.setNumber(flightNumber);
 		flight.setPrice(price);
 		flight.setFromOrigin(from);
 		flight.setToDestination(to);
-		flight.setDepartureTime(new Date(departureTime));
-		flight.setArrivalTime(new Date(arrivalTime));
+		flight.setDepartureTime(departureTime);
+		flight.setArrivalTime(arrivalTime);
 		flight.setDescription(description);
 		flight.setSeatsLeft(capacity);
 		flight.setPlane(plane);

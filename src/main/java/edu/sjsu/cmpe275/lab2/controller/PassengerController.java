@@ -145,6 +145,7 @@ public class PassengerController {
 //			String xmlVal = XML.toString(jsonVal);
 			XStream xs = new XStream();
 			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+			xs.setMode(XStream.NO_REFERENCES);
 			xs.alias("passenger", Passenger.class);
 			xs.alias("flight", Flight.class);
 			xs.alias("reservation", Reservation.class);
@@ -156,6 +157,7 @@ public class PassengerController {
 			xs.omitField(Reservation.class, "passenger");
 			xs.omitField(Flight.class, "reservations");
 			xs.omitField(Flight.class, "passengers");
+			xs.omitField(Passenger.class, "flights");
 			
 			responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_XML);

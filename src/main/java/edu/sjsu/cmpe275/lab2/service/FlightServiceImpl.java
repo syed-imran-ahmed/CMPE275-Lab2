@@ -1,6 +1,7 @@
 package edu.sjsu.cmpe275.lab2.service;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,5 +39,23 @@ public class FlightServiceImpl implements FlightService {
 	@Override
 	public void delete(Serializable id) {
 		flightRepository.delete((String) id);
+	}
+	
+	@Override
+	public boolean checkIfOverlappingFlightTimes(List<Long> departureTimes, List<Long> arrivalTimes)
+	{
+		Long[] dep = departureTimes.toArray(new Long[0]);
+		Long[] arr = arrivalTimes.toArray(new Long[0]);
+		Arrays.sort(dep);
+		Arrays.sort(arr);
+	
+		for(int i=1;i<dep.length;i++)
+		{
+			if(arr[i-1]>dep[i])
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
