@@ -129,8 +129,6 @@ public class PassengerController {
 			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 		}
 
-		
-		
 		HttpHeaders responseHeaders;
 		if(xml)
 		{

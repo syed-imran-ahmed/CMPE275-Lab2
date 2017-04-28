@@ -13,7 +13,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 /**
  * @author Imran
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 @Entity
 @Table(name = "reservation")
 //@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="ordernumber")
+@JsonTypeInfo(include=As.WRAPPER_OBJECT, use=JsonTypeInfo.Id.NAME)
 public class Reservation implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2L;

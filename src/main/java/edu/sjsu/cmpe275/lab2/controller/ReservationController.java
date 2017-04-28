@@ -2,7 +2,6 @@ package edu.sjsu.cmpe275.lab2.controller;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +66,7 @@ public class ReservationController {
 			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 		}
 		
 		List<Flight> flights = new ArrayList<Flight>();
@@ -82,7 +81,7 @@ public class ReservationController {
 				ErrorJSON err = new ErrorJSON(errMsg);
 				HttpHeaders responseHeaders = new HttpHeaders();
 			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
-				return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 			}
 			
 			if(flight.getSeatsLeft()<=0)
@@ -91,7 +90,7 @@ public class ReservationController {
 				ErrorJSON err = new ErrorJSON(errMsg);
 				HttpHeaders responseHeaders = new HttpHeaders();
 			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-				return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 			}
 			else{
 				//flight.setSeatsLeft(flight.getPlane().getCapacity()-1);
@@ -169,7 +168,7 @@ public class ReservationController {
 	}
 	
 	
-
+	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(value = "/{ordernumber}",method = RequestMethod.PUT)
 	public ResponseEntity<?> updateReservation(
 			@PathVariable("ordernumber") Long ordernumber,

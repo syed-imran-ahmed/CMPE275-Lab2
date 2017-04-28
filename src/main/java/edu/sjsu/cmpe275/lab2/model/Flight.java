@@ -13,7 +13,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 /**
  * 
@@ -23,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name = "flight")
+@JsonTypeInfo(include=As.WRAPPER_OBJECT, use=JsonTypeInfo.Id.NAME)
 public class Flight implements java.io.Serializable {
 
 	private static final long serialVersionUID = 3L;
