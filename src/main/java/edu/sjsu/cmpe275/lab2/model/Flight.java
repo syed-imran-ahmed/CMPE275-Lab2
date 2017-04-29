@@ -159,20 +159,8 @@ public class Flight implements java.io.Serializable {
 	}
 
 	public void setPassengers(List<Passenger> passengers) {
-		
-		
 		this.passengers = passengers;
 	}
-	
-//	@OneToMany(cascade = CascadeType.ALL)
-//	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id") })
-//	public List<Passenger> getPassengers() {
-//		return passengers;
-//	}
-//
-//	public void setPassengers(List<Passenger> passengers) {
-//		this.passengers = passengers;
-//	}
 
 	@Override
 	public String toString() {

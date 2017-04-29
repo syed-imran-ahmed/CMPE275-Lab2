@@ -1,10 +1,19 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.hibernate.collection.internal.PersistentBag;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,9 +22,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.hibernate.converter.HibernatePersistentCollectionConverter;
 
 import edu.sjsu.cmpe275.lab2.model.Flight;
+import edu.sjsu.cmpe275.lab2.model.Passenger;
 import edu.sjsu.cmpe275.lab2.model.Plane;
+import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 
@@ -47,12 +61,7 @@ public class FlightController {
 			@RequestParam("capacity") int capacity,
 			@RequestParam("model") String model,
 			@RequestParam("manufacturer") String manufacturer,
-			@RequestParam("yearOfManufacture") int yearOfManufacture) throws ParseException {
-
-//		departureTime = departureTime.substring(0,10)+" "+departureTime.substring(11);
-//		arrivalTime = arrivalTime.substring(0,10)+" "+arrivalTime.substring(11);
-//		Date depTime = new SimpleDateFormat("yyyy-MM-dd HH").parse(departureTime);
-//		Date arrTime = new SimpleDateFormat("yyyy-MM-dd HH").parse(arrivalTime);
+			@RequestParam("yearOfManufacture") int yearOfManufacture) {
 		
 		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
 		Flight flight = new Flight();
@@ -73,28 +82,156 @@ public class FlightController {
 
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Flight> getFlight(@PathVariable("id") String id) {
+	public ResponseEntity<?> getFlight(
+			@PathVariable("id") String id,
+			@RequestParam(value = "xml", required = false) boolean xml) throws JsonProcessingException {
 		Flight flight = flightService.getById(id);
 		if (flight == null) {
-			logger.debug("Flight with id " + id + " does not exist.");
-			return new ResponseEntity<Flight>(HttpStatus.NOT_FOUND);
+			String errMsg = "Sorry, the requested flight with id " + id + " does not exists";
+			logger.debug("Sorry, the requested flight with id " + id + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 		}
-		logger.debug("Found Flight: " + flight);
-		return new ResponseEntity<Flight>(flight, HttpStatus.OK);
+		
+		if(xml)
+		{
+			XStream xs = new XStream();
+			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+			//xs.setMode(XStream.NO_REFERENCES);
+			xs.alias("passenger", Passenger.class);
+			xs.alias("flight", Flight.class);
+			xs.alias("reservation", Reservation.class);
+			
+			  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+			xs.addDefaultImplementation(PersistentBag.class, List.class);
+			xs.addDefaultImplementation(Timestamp.class, Date.class);
+			xs.omitField(Flight.class, "reservations");
+		
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+		    return new ResponseEntity<>(xs.toXML(flight),responseHeaders, HttpStatus.OK);
+		}
+		else
+		{
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+		    return new ResponseEntity<>(flight,responseHeaders, HttpStatus.OK);
+		}
 	}
 	
+	@JsonView(Views.ProjectOnlyPassengerFields.class)
+	@RequestMapping(value = "/{flightNumber}",method = RequestMethod.PUT)
+	public ResponseEntity<?> updateFlight(
+			@PathVariable ("flightNumber") String flightNumber,
+			@RequestParam("price") int price,
+			@RequestParam("from") String from,
+			@RequestParam("to") String to,
+			@RequestParam("departureTime") String departureTime,
+			@RequestParam("arrivalTime") String arrivalTime,
+			@RequestParam("description") String description,
+			@RequestParam("capacity") int capacity,
+			@RequestParam("model") String model,
+			@RequestParam("manufacturer") String manufacturer,
+			@RequestParam("yearOfManufacture") int yearOfManufacture) throws JsonProcessingException  {
+		
+		Flight existingFlight = flightService.getById(flightNumber);
+		
+		if (existingFlight == null) {
+			String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exists";
+			logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+	
+		} else if(capacity < existingFlight.getPlane().getCapacity() && capacity < existingFlight.getReservations().size()){
+				String errMsg = "Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations";
+				logger.debug("Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations");
+				ErrorJSON err = new ErrorJSON(errMsg);
+				HttpHeaders responseHeaders = new HttpHeaders();
+				responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+		} else {
+			
+			List<Reservation> reservations = existingFlight.getReservations();
+			List<String> flightNumbersOfOtherFlight = new ArrayList<String>();
+			for(Reservation res: reservations)
+			{
+				for(Flight flight : res.getFlights())
+				{
+					if(!flight.getNumber().equals(flightNumber))
+					{
+						flightNumbersOfOtherFlight.add(flight.getNumber());
+					}
+				}
+			}
+			
+			List<Long> arrivalTimes = new ArrayList<Long>();
+			List<Long> departureTimes = new ArrayList<Long>();
+			arrivalTimes.add(Long.parseLong(arrivalTime.replace("-", "")));
+			departureTimes.add(Long.parseLong(departureTime.replace("-", "")));
+						
+			for(String flightNum : flightNumbersOfOtherFlight){
+				Flight flight = flightService.getById(flightNum);
+				departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
+				arrivalTimes.add(Long.parseLong(flight.getArrivalTime().replaceAll("-", "")));
+			}
+			
+			if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
+			{
+				String errMsg = "There is an overlap of flight time intervals for a passenger. Flight timings cannot be modified";
+				ErrorJSON err = new ErrorJSON(errMsg);
+				HttpHeaders responseHeaders = new HttpHeaders();
+			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			}
+			
+			existingFlight.setPrice(price);
+			existingFlight.setFromOrigin(from);
+			existingFlight.setToDestination(to);
+			existingFlight.setDepartureTime(departureTime);
+			existingFlight.setArrivalTime(arrivalTime);
+			existingFlight.setDescription(description);
+			existingFlight.getPlane().setCapacity(capacity);
+			existingFlight.getPlane().setModel(model);
+			existingFlight.getPlane().setManufacturer(manufacturer);
+			existingFlight.getPlane().setYearOfManufacture(yearOfManufacture);
+			
+			flightService.save(existingFlight);
+			return new ResponseEntity<Flight>(existingFlight, HttpStatus.OK);
+		}
+	}
+
+	
+	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<String> deleteFlight(@PathVariable("id") String id) {
+	public ResponseEntity<String> deleteFlight(@PathVariable("id") String id) throws JsonProcessingException {
 		Flight flight = flightService.getById(id);
 		if (flight == null) {
-			logger.debug("Flight with id " + id + " does not exist.");
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight number "+id+ " doesn't exist");
+			String errMsg = "Sorry, the requested flight with id " + id + " does not exists";
+			logger.debug("Sorry, the requested flight with id " + id + " does not exists");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 		}else if(flight.getSeatsLeft() != flight.getPlane().getCapacity()){
-			logger.debug("Flight with id " + id + " still has some reservations.");
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Flight number "+id+ " still has some reservations.");
+			String errMsg = "Flight with " + id + " still has some reservations. It cannot be deleted";
+			logger.debug("Flight with " + id + " still has some reservations. It cannot be deleted");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
 		}
 		flightService.delete(id);
-		logger.debug("Deleted Flight: " + flight);
-		return ResponseEntity.status(HttpStatus.OK).body("Flight number "+id+" has been deleted successfully");
+		String errMsg = "Flight with number " + id + " is deleted successfully";
+		logger.debug("Flight with number " + id + " is deleted successfully");
+		ErrorJSON err = new ErrorJSON(errMsg);			
+		JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
+		String xmlVal = XML.toString(jsonVal);
+		HttpHeaders responseHeaders = new HttpHeaders();
+	    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+		return new ResponseEntity<>(xmlVal,responseHeaders,HttpStatus.OK);
 	}
 }

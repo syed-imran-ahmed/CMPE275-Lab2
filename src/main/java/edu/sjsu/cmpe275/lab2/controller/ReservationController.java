@@ -389,7 +389,7 @@ public class ReservationController {
 		{
 			for(Flight flight:flights)
 			{
-				flight.setSeatsLeft(flight.getPlane().getCapacity()-1);
+				flight.setSeatsLeft(flight.getSeatsLeft()-1);
 			}
 		}
 		return null;
