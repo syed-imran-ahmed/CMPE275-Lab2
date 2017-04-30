@@ -1,10 +1,11 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.hibernate.collection.internal.PersistentBag;
@@ -50,7 +51,7 @@ public class FlightController {
 
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value ="/{flightNumber}", method = RequestMethod.POST)
-	public ResponseEntity<Flight> addFlight(
+	public ResponseEntity<?> addFlight(
 			@PathVariable ("flightNumber") String flightNumber,
 			@RequestParam("price") int price,
 			@RequestParam("from") String from,
@@ -61,7 +62,18 @@ public class FlightController {
 			@RequestParam("capacity") int capacity,
 			@RequestParam("model") String model,
 			@RequestParam("manufacturer") String manufacturer,
-			@RequestParam("yearOfManufacture") int yearOfManufacture) {
+			@RequestParam("yearOfManufacture") int yearOfManufacture) throws JsonProcessingException {
+		
+		if(Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", "")))
+		{
+			String errMsg = "The arrival time of the requested flight is before than the departure time";
+			logger.debug("The arrival time of the requested flight is before than the departure time");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+		}
+		
 		
 		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
 		Flight flight = new Flight();
@@ -94,12 +106,15 @@ public class FlightController {
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
 			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
 		}
+		//Forcefully populating the passengers in the Flight table 
+		List<Passenger> passengers = flight.getPassengers();
+		flight.setPassengers(passengers);
 		
 		if(xml)
 		{
 			XStream xs = new XStream();
 			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
-			//xs.setMode(XStream.NO_REFERENCES);
+			xs.setMode(XStream.NO_REFERENCES);
 			xs.alias("passenger", Passenger.class);
 			xs.alias("flight", Flight.class);
 			xs.alias("reservation", Reservation.class);
@@ -108,7 +123,9 @@ public class FlightController {
 			xs.addDefaultImplementation(PersistentBag.class, List.class);
 			xs.addDefaultImplementation(Timestamp.class, Date.class);
 			xs.omitField(Flight.class, "reservations");
-		
+			xs.omitField(Passenger.class, "reservations");
+			xs.omitField(Passenger.class, "flights");
+			
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
 		    return new ResponseEntity<>(xs.toXML(flight),responseHeaders, HttpStatus.OK);
@@ -136,6 +153,16 @@ public class FlightController {
 			@RequestParam("manufacturer") String manufacturer,
 			@RequestParam("yearOfManufacture") int yearOfManufacture) throws JsonProcessingException  {
 		
+		if(Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", "")))
+		{
+			String errMsg = "The arrival time of the requested flight is before than the departure time";
+			logger.debug("The arrival time of the requested flight is before than the departure time");
+			ErrorJSON err = new ErrorJSON(errMsg);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+		}
+		
 		Flight existingFlight = flightService.getById(flightNumber);
 		
 		if (existingFlight == null) {
@@ -156,38 +183,41 @@ public class FlightController {
 		} else {
 			
 			List<Reservation> reservations = existingFlight.getReservations();
-			List<String> flightNumbersOfOtherFlight = new ArrayList<String>();
+			Set<String> flightNumberOfOtherFlights = new HashSet<String>();
+			List<Long> arrivalTimes = new ArrayList<Long>();
+			List<Long> departureTimes = new ArrayList<Long>();
 			for(Reservation res: reservations)
 			{
+				arrivalTimes.clear();
+				departureTimes.clear();
+				flightNumberOfOtherFlights.clear();
 				for(Flight flight : res.getFlights())
 				{
 					if(!flight.getNumber().equals(flightNumber))
 					{
-						flightNumbersOfOtherFlight.add(flight.getNumber());
+						flightNumberOfOtherFlights.add(flight.getNumber());
 					}
 				}
+				
+				arrivalTimes.add(Long.parseLong(arrivalTime.replace("-", "")));
+				departureTimes.add(Long.parseLong(departureTime.replace("-", "")));
+							
+				for(String flightNum : flightNumberOfOtherFlights){
+					Flight flight = flightService.getById(flightNum);
+					departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
+					arrivalTimes.add(Long.parseLong(flight.getArrivalTime().replaceAll("-", "")));
+				}
+				
+				if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
+				{
+					String errMsg = "There is an overlap of flight time intervals for a passenger. Flight timings cannot be modified";
+					ErrorJSON err = new ErrorJSON(errMsg);
+					HttpHeaders responseHeaders = new HttpHeaders();
+				    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+					return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+				}
 			}
-			
-			List<Long> arrivalTimes = new ArrayList<Long>();
-			List<Long> departureTimes = new ArrayList<Long>();
-			arrivalTimes.add(Long.parseLong(arrivalTime.replace("-", "")));
-			departureTimes.add(Long.parseLong(departureTime.replace("-", "")));
 						
-			for(String flightNum : flightNumbersOfOtherFlight){
-				Flight flight = flightService.getById(flightNum);
-				departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
-				arrivalTimes.add(Long.parseLong(flight.getArrivalTime().replaceAll("-", "")));
-			}
-			
-			if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
-			{
-				String errMsg = "There is an overlap of flight time intervals for a passenger. Flight timings cannot be modified";
-				ErrorJSON err = new ErrorJSON(errMsg);
-				HttpHeaders responseHeaders = new HttpHeaders();
-			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
-			}
-			
 			existingFlight.setPrice(price);
 			existingFlight.setFromOrigin(from);
 			existingFlight.setToDestination(to);

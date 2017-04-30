@@ -308,8 +308,8 @@ public class ReservationController {
 	public ResponseEntity<?> deleteReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
 		Reservation reservation = reservationService.getById(ordernumber);
 		if (reservation == null) {
-			String errMsg = "Reserveration with number " + ordernumber + " does not exists";
-			logger.debug("Reserveration with number " + ordernumber + " does not exists");
+			String errMsg = "Reserveration with number " + ordernumber + " does not exist";
+			logger.debug("Reserveration with number " + ordernumber + " does not exist");
 			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -321,8 +321,8 @@ public class ReservationController {
 				flight.setSeatsLeft(flight.getSeatsLeft()+1);
 			}
 			reservationService.delete(ordernumber);
-			String errMsg = "Reservation with number " + ordernumber + " is canceled successfully";
-			logger.debug("Reservation with number " + ordernumber + " is canceled successfully");
+			String errMsg = "Reservation with number " + ordernumber + " is cancelled successfully";
+			logger.debug("Reservation with number " + ordernumber + " is cancelled successfully");
 			ErrorJSON err = new ErrorJSON(errMsg);			
 			JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
 			String xmlVal = XML.toString(jsonVal);
@@ -352,8 +352,8 @@ public class ReservationController {
 		for(String flightNumber : flightNumbers){
 			Flight flight = flightService.getById(flightNumber);
 			if (flight == null) {
-				String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exists";
-				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exists");
+				String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exist";
+				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exist");
 				ErrorJSON err = new ErrorJSON(errMsg);
 				HttpHeaders responseHeaders = new HttpHeaders();
 			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			

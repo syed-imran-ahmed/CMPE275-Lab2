@@ -1,6 +1,8 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -58,6 +60,7 @@ public class PassengerController {
 		if(passengerService.getByPhone(phone).size()==0)
 		{
 			Passenger passenger = new Passenger(firstName,lastName,age,gender,phone);
+			passenger.setReservations(Collections.EMPTY_LIST);
 			try{
 				passengerService.save(passenger);
 				logger.debug("Added:: " + passenger);
@@ -73,7 +76,7 @@ public class PassengerController {
 		}
 		else
 		{
-			String errMsg = "another passenger with the same phone number already exists.";
+			String errMsg = "Another passenger with the same phone number already exists.";
 			ErrorJSON err = new ErrorJSON(errMsg);
 			HttpHeaders responseHeaders = new HttpHeaders();
 		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -132,15 +135,6 @@ public class PassengerController {
 		HttpHeaders responseHeaders;
 		if(xml)
 		{
-			//ObjectMapper mapper = new ObjectMapper();
-			
-//			
-//			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
-//			//mapper.setVisibility(PropertyAccessor.FIELD, Visibility.NONE);
-//			String jsonString = mapper.writeValueAsString(passenger);
-//			
-//			JSONObject jsonVal = new JSONObject(jsonString);
-//			String xmlVal = XML.toString(jsonVal);
 			XStream xs = new XStream();
 			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
 			xs.setMode(XStream.NO_REFERENCES);
