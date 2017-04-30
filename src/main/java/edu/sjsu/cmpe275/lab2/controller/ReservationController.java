@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.collection.internal.PersistentBag;
-import org.json.JSONObject;
-import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -63,10 +61,7 @@ public class ReservationController {
 		if (passenger == null) {
 			String errMsg = "Sorry, the requested passenger with id " + passengerId + " does not exists";
 			logger.debug("Sorry, the requested passenger with id " + passengerId + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
-			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
 		List<Flight> flights = new ArrayList<Flight>();
@@ -115,10 +110,7 @@ public class ReservationController {
 		if (reservation == null) {
 			String errMsg = "Reserveration with number " + ordernumber + " does not exists";
 			logger.debug("Reserveration with number " + ordernumber + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders, HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}
 		logger.debug("Found Flight: " + reservation);
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
@@ -137,19 +129,13 @@ public class ReservationController {
 		if (existingReservation == null) {
 			String errMsg = "Sorry, the requested reservation with id " + ordernumber + " does not exists";
 			logger.debug("Sorry, the requested reservationn with id " + ordernumber + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
 		} else if((flightsAdded!=null && flightsAdded.size()<=0) || (flightsRemoved!=null && flightsRemoved.size()<=0)){
 			
 			String errMsg = "Sorry, the flights list cannot be empty";
 			logger.debug("Sorry, the flights list cannot be empty");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		else if(flightsAdded!=null || flightsRemoved!=null)
 		{
@@ -204,10 +190,7 @@ public class ReservationController {
 		{
 			String errMsg = "Please specify at least one parameter to search for reservation";
 			logger.debug("Please specify at least one parameter to search for reservation");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
 		List<Reservation> existingReservations = reservationService.getAll();
@@ -310,10 +293,7 @@ public class ReservationController {
 		if (reservation == null) {
 			String errMsg = "Reserveration with number " + ordernumber + " does not exist";
 			logger.debug("Reserveration with number " + ordernumber + " does not exist");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders, HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 			
 		} else {
 			for(Flight flight:reservation.getFlights())
@@ -321,14 +301,9 @@ public class ReservationController {
 				flight.setSeatsLeft(flight.getSeatsLeft()+1);
 			}
 			reservationService.delete(ordernumber);
-			String errMsg = "Reservation with number " + ordernumber + " is cancelled successfully";
+			String successMsg = "Reservation with number " + ordernumber + " is cancelled successfully";
 			logger.debug("Reservation with number " + ordernumber + " is cancelled successfully");
-			ErrorJSON err = new ErrorJSON(errMsg);			
-			JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
-			String xmlVal = XML.toString(jsonVal);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
-			return new ResponseEntity<>(xmlVal,responseHeaders,HttpStatus.OK);
+			return ControllerUtil.sendSuccess(successMsg);
 		}
 	}
 
@@ -354,19 +329,13 @@ public class ReservationController {
 			if (flight == null) {
 				String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exist";
 				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exist");
-				ErrorJSON err = new ErrorJSON(errMsg);
-				HttpHeaders responseHeaders = new HttpHeaders();
-			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
-				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 			}
 			
 			if(flight.getSeatsLeft()<=0)
 			{
 				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
-				ErrorJSON err = new ErrorJSON(errMsg);
-				HttpHeaders responseHeaders = new HttpHeaders();
-			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 			}
 			else{
 				departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
@@ -380,10 +349,7 @@ public class ReservationController {
 		if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
 		{
 			String errMsg = "There is an overlap of flight time intervals. Reservation cannot be done";
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		else
 		{

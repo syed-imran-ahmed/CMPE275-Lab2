@@ -1,15 +1,12 @@
 package edu.sjsu.cmpe275.lab2.controller;
 
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.collection.internal.PersistentBag;
-import org.json.JSONObject;
-import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -60,7 +57,7 @@ public class PassengerController {
 		if(passengerService.getByPhone(phone).size()==0)
 		{
 			Passenger passenger = new Passenger(firstName,lastName,age,gender,phone);
-			passenger.setReservations(Collections.EMPTY_LIST);
+			passenger.setReservations(Collections.emptyList());
 			try{
 				passengerService.save(passenger);
 				logger.debug("Added:: " + passenger);
@@ -68,19 +65,14 @@ public class PassengerController {
 			}
 			catch(DataAccessException e)
 			{
-				ErrorJSON err = new ErrorJSON(e.getMessage());
-				HttpHeaders responseHeaders = new HttpHeaders();
-			    responseHeaders.setContentType(MediaType.APPLICATION_JSON);		
-				return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+				return ControllerUtil.sendBadRequest(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		}
 		else
 		{
 			String errMsg = "Another passenger with the same phone number already exists.";
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getBadRequestError(),responseHeaders,HttpStatus.BAD_REQUEST);
+			HttpStatus status = HttpStatus.BAD_REQUEST;
+			return ControllerUtil.sendBadRequest(errMsg, status);
 		}
 	}
 
@@ -99,10 +91,7 @@ public class PassengerController {
 		if (existingPassenger == null) {
 			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
 			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
 		} else {
 			existingPassenger.setAge(age);
@@ -117,19 +106,15 @@ public class PassengerController {
 
 	@JsonView(Views.ProjectRelevantFieldsInPassenger.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET,produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-	public ResponseEntity<?> getPassengerInXML(
+	public ResponseEntity<?> getPassenger(
 			@PathVariable("id") Long id,
-			@RequestParam(value = "xml", required = false) boolean xml,
-			@RequestParam(value = "json", required = false) boolean json) throws JsonProcessingException {
+			@RequestParam(value = "xml", required = false) boolean xml) throws JsonProcessingException {
 		
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
 			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
 			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);			
-			return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}
 
 		HttpHeaders responseHeaders;
@@ -170,37 +155,19 @@ public class PassengerController {
 		if (passenger == null) {
 			String errMsg = "Passenger with id " + id + " does not exists";
 			logger.debug("Passenger with id " + id + " does not exists");
-			ErrorJSON err = new ErrorJSON(errMsg);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-		    return new ResponseEntity<String>(err.getNotFoundError(),responseHeaders,HttpStatus.NOT_FOUND);
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 			
 		} else {
+			List<Reservation> reservations = passenger.getReservations();
+			for(Reservation reservation : reservations){
+				for(Flight flight : reservation.getFlights()){
+					flight.setSeatsLeft(flight.getSeatsLeft() + 1);
+				}
+			}
 			passengerService.delete(id);
-			String errMsg = "Passenger with id " + id + " is deleted successfully";
+			String successMsg = "Passenger with id " + id + " is deleted successfully";
 			logger.debug("Passenger with id " + id + " is deleted successfully");
-			ErrorJSON err = new ErrorJSON(errMsg);			
-			JSONObject jsonVal = new JSONObject(err.getSuccessfulMsg());
-			String xmlVal = XML.toString(jsonVal);
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
-			return new ResponseEntity<>(xmlVal,responseHeaders,HttpStatus.OK);
+			return ControllerUtil.sendSuccess(successMsg);
 		}
 	}
-
-//	@RequestMapping(method = RequestMethod.GET)
-//	public ResponseEntity<List<Employee>> getAllEmployees() {
-//		List<Employee> employees = empService.getAll();
-//		if (employees.isEmpty()) {
-//			logger.debug("Employees does not exists");
-//			return new ResponseEntity<List<Employee>>(HttpStatus.NO_CONTENT);
-//		}
-//		logger.debug("Found " + employees.size() + " Employees");
-//		logger.debug(Arrays.toString(employees.toArray()));
-//		return new ResponseEntity<List<Employee>>(employees, HttpStatus.OK);
-//	}
-
-
-	
-
 }

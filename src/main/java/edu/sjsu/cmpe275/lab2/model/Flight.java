@@ -3,14 +3,12 @@ package edu.sjsu.cmpe275.lab2.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -136,15 +134,7 @@ public class Flight implements java.io.Serializable {
 		this.reservations = reservations;
 	}
 	
-	@ManyToMany(cascade  = 
-        { 
-                CascadeType.DETACH, 
-                CascadeType.MERGE, 
-                CascadeType.REFRESH, 
-                CascadeType.PERSIST,
-                CascadeType.REMOVE
-        })
-	@JoinTable(name = "flight_passenger", joinColumns = { @JoinColumn(name = "flight_number", referencedColumnName="number") }, inverseJoinColumns = { @JoinColumn(name = "passenger_id", referencedColumnName="id") })
+	@Transient
 	public List<Passenger> getPassengers() {
 		
 		List<Passenger> pas = new ArrayList<Passenger>();

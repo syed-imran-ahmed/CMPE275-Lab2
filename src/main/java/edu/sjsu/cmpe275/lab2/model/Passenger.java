@@ -51,7 +51,6 @@ public class Passenger implements java.io.Serializable {
 	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
 	@JsonView({Views.ProjectRelevantFieldsInPassenger.class})
 	private List<Reservation> reservations;
-	private List<Flight> flights;
 
 	public Passenger() {
 	}
@@ -136,16 +135,6 @@ public class Passenger implements java.io.Serializable {
 
 	public void setReservations(List<Reservation> reservations) {
 		this.reservations = reservations;
-	}
-
-	@ManyToMany(mappedBy="passengers")
-	@JsonIgnore
-	public List<Flight> getFlights() {
-		return flights;
-	}
-
-	public void setFlights(List<Flight> flights) {
-		this.flights = flights;
 	}
 	
 	@Override
