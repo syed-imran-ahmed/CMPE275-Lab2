@@ -5,17 +5,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
 
 public class ControllerUtil {
 
-	public static ResponseEntity<?> sendBadRequest(String errMsg, HttpStatus status) {
+	public static ResponseEntity<?> sendBadRequest(String errMsg, HttpStatus status) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
 		BadRequest badRequest = new BadRequest();
 		badRequest.setCode(status.toString());
 		badRequest.setMsg(errMsg);
+		String jsonString = mapper.writeValueAsString(badRequest);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-		return new ResponseEntity<BadRequest>(badRequest, responseHeaders, status);
+		return new ResponseEntity<String>(jsonString, responseHeaders, status);
 	}
 	
 	public static ResponseEntity<?> sendSuccess(String errMsg) {

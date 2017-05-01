@@ -39,7 +39,7 @@ import edu.sjsu.cmpe275.lab2.service.ReservationService;
 @RequestMapping("/reservation")
 public class ReservationController {
 
-	final static Logger logger = Logger.getLogger(FlightController.class);
+	final static Logger logger = Logger.getLogger(ReservationController.class);
 
 	@Autowired
 	FlightService flightService;
@@ -65,6 +65,14 @@ public class ReservationController {
 		}
 		
 		List<Flight> flights = new ArrayList<Flight>();
+		List<Reservation> passengerReservations = passenger.getReservations();
+		for(Reservation res : passengerReservations )
+		{
+			for(Flight flight: res.getFlights()){
+				flightNumbers.add(flight.getNumber());
+			}
+		}
+		
 		ResponseEntity<?> res = checkFlightOverlapping(flights,flightNumbers);
 		if(res!=null)
 			return res;
