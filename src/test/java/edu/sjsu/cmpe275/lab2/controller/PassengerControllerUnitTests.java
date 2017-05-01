@@ -22,6 +22,9 @@ import edu.sjsu.cmpe275.lab2.model.Plane;
 import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.service.PassengerService;
 
+/**
+ * @author Imran
+ */
 public class PassengerControllerUnitTests {
 
 	private PassengerController controller;

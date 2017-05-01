@@ -8,14 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -32,8 +28,6 @@ public class Passenger implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	
-	//@Column(name = "id", unique = true, nullable = false)
 	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private Long id;
 	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
@@ -47,8 +41,7 @@ public class Passenger implements java.io.Serializable {
 	@JsonView({Views.ProjectOnlyPassengerFields.class,Views.ProjectOnlyFlightFieldsInReservation.class,Views.ProjectRelevantFieldsInPassenger.class})
 	private String phone;
 
-	//@OneToMany(cascade = CascadeType.ALL)
-	//@JoinTable(name = "passenger_reservation", joinColumns = { @JoinColumn(name = "passenger_id") }, inverseJoinColumns = { @JoinColumn(name = "reservation_ordernumber") })
+	
 	@JsonView({Views.ProjectRelevantFieldsInPassenger.class})
 	private List<Reservation> reservations;
 
@@ -59,15 +52,6 @@ public class Passenger implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public Passenger(Long id, String firstname, String lastname, int age, String gender, String phone) {
-		this.id = id;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.age = age;
-		this.gender = gender;
-		this.phone = phone;
-	}
-
 	public Passenger(String firstname, String lastname, int age, String gender, String phone) {
 		this.firstname = firstname;
 		this.lastname = lastname;
@@ -76,7 +60,6 @@ public class Passenger implements java.io.Serializable {
 		this.phone = phone;
 	}
 
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public Long getId() {
