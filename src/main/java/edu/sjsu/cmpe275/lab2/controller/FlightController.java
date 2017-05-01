@@ -61,30 +61,55 @@ public class FlightController {
 			@RequestParam("manufacturer") String manufacturer,
 			@RequestParam("yearOfManufacture") int yearOfManufacture) throws JsonProcessingException {
 		
-		if(Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", "")))
+		if((Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", ""))) || capacity<=0 || price <=0)
 		{
-			String errMsg = "The arrival time of the requested flight is before than the departure time";
-			logger.debug("The arrival time of the requested flight is before than the departure time");
+			String errMsg = "The parameters given for the filght are incorrect, either the price, capacity or timings are not correct ";
+			logger.debug("The parameters given for the filght are incorrect, either the price, capacity or timings are not correct");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
+		Flight existingFlight = flightService.getById(flightNumber);
 		
-		Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
-		Flight flight = new Flight();
-		flight.setNumber(flightNumber);
-		flight.setPrice(price);
-		flight.setFromOrigin(from);
-		flight.setToDestination(to);
-		flight.setDepartureTime(departureTime);
-		flight.setArrivalTime(arrivalTime);
-		flight.setDescription(description);
-		flight.setSeatsLeft(capacity);
-		flight.setPlane(plane);
+		if (existingFlight == null) {
+			Plane plane = new Plane(capacity, model, manufacturer, yearOfManufacture);
+			Flight flight = new Flight();
+			
+			flight.setNumber(flightNumber);
+			flight.setPrice(price);
+			flight.setFromOrigin(from);
+			flight.setToDestination(to);
+			flight.setDepartureTime(departureTime);
+			flight.setArrivalTime(arrivalTime);
+			flight.setDescription(description);
+			flight.setSeatsLeft(capacity);
+			flight.setPlane(plane);
 
-		flightService.save(flight);
-		logger.debug("Created/updated flight " + flight);
-		return new ResponseEntity<Flight>(flight, HttpStatus.CREATED);
+			flightService.save(flight);
+			logger.debug("Created/updated flight " + flight);
+			return new ResponseEntity<Flight>(flight, HttpStatus.CREATED);
+	
+		} else {
+			ResponseEntity<?> res  = createOrUpdateFlight(existingFlight,flightNumber,departureTime,arrivalTime,capacity);
+			if(res!=null)
+				return res;
+						
+			existingFlight.setPrice(price);
+			existingFlight.setFromOrigin(from);
+			existingFlight.setToDestination(to);
+			existingFlight.setDepartureTime(departureTime);
+			existingFlight.setArrivalTime(arrivalTime);
+			existingFlight.setDescription(description);
+			existingFlight.getPlane().setCapacity(capacity);
+			existingFlight.getPlane().setModel(model);
+			existingFlight.getPlane().setManufacturer(manufacturer);
+			existingFlight.getPlane().setYearOfManufacture(yearOfManufacture);
+			
+			flightService.save(existingFlight);
+			return new ResponseEntity<Flight>(existingFlight, HttpStatus.OK);
+		}
+
 	}
+	
 
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -144,10 +169,10 @@ public class FlightController {
 			@RequestParam("manufacturer") String manufacturer,
 			@RequestParam("yearOfManufacture") int yearOfManufacture) throws JsonProcessingException  {
 		
-		if(Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", "")))
+		if((Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", ""))) || capacity<=0 || price <=0)
 		{
-			String errMsg = "The arrival time of the requested flight is before than the departure time";
-			logger.debug("The arrival time of the requested flight is before than the departure time");
+			String errMsg = "The parameters given for the filght are incorrect, either the price, capacity or timings are not correct ";
+			logger.debug("The parameters given for the filght are incorrect, either the price, capacity or timings are not correct");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
@@ -158,45 +183,12 @@ public class FlightController {
 			logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exists");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
-		} else if(capacity < existingFlight.getPlane().getCapacity() && capacity < existingFlight.getReservations().size()){
-				String errMsg = "Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations";
-				logger.debug("Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations");
-				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		} else {
 			
-			List<Reservation> reservations = existingFlight.getReservations();
-			Set<String> flightNumberOfOtherFlights = new HashSet<String>();
-			List<Long> arrivalTimes = new ArrayList<Long>();
-			List<Long> departureTimes = new ArrayList<Long>();
-			for(Reservation res: reservations)
-			{
-				arrivalTimes.clear();
-				departureTimes.clear();
-				flightNumberOfOtherFlights.clear();
-				for(Flight flight : res.getFlights())
-				{
-					if(!flight.getNumber().equals(flightNumber))
-					{
-						flightNumberOfOtherFlights.add(flight.getNumber());
-					}
-				}
-				
-				arrivalTimes.add(Long.parseLong(arrivalTime.replace("-", "")));
-				departureTimes.add(Long.parseLong(departureTime.replace("-", "")));
-							
-				for(String flightNum : flightNumberOfOtherFlights){
-					Flight flight = flightService.getById(flightNum);
-					departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
-					arrivalTimes.add(Long.parseLong(flight.getArrivalTime().replaceAll("-", "")));
-				}
-				
-				if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
-				{
-					String errMsg = "There is an overlap of flight time intervals for a passenger. Flight timings cannot be modified";
-					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
-				}
-			}
-						
+			ResponseEntity<?> res  = createOrUpdateFlight(existingFlight,flightNumber,departureTime,arrivalTime,capacity);
+			if(res!=null)
+				return res;
+			
 			existingFlight.setPrice(price);
 			existingFlight.setFromOrigin(from);
 			existingFlight.setToDestination(to);
@@ -213,7 +205,6 @@ public class FlightController {
 		}
 	}
 
-	
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteFlight(@PathVariable("id") String id) throws JsonProcessingException {
@@ -232,4 +223,51 @@ public class FlightController {
 		logger.debug("Flight with number " + id + " is deleted successfully");
 		return ControllerUtil.sendSuccess(successMsg);
 	}
+	
+	
+	
+	ResponseEntity<?> createOrUpdateFlight(Flight existingFlight, String flightNumber,String departureTime, String arrivalTime, int capacity) throws JsonProcessingException
+	{
+		if(capacity < existingFlight.getPlane().getCapacity() && capacity < existingFlight.getReservations().size()){
+			String errMsg = "Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations";
+			logger.debug("Sorry, the capacity of the requested flight with id " + flightNumber + " cannot be less than the existing reservations");
+			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
+		} else {
+
+			List<Reservation> reservations = existingFlight.getReservations();
+			Set<String> flightNumberOfOtherFlights = new HashSet<String>();
+			List<Long> arrivalTimes = new ArrayList<Long>();
+			List<Long> departureTimes = new ArrayList<Long>();
+			for(Reservation res: reservations)
+			{
+				arrivalTimes.clear();
+				departureTimes.clear();
+				flightNumberOfOtherFlights.clear();
+				for(Flight resflight : res.getFlights())
+				{
+					if(!resflight.getNumber().equals(flightNumber))
+					{
+						flightNumberOfOtherFlights.add(resflight.getNumber());
+					}
+				}
+
+				arrivalTimes.add(Long.parseLong(arrivalTime.replace("-", "")));
+				departureTimes.add(Long.parseLong(departureTime.replace("-", "")));
+
+				for(String flightNum : flightNumberOfOtherFlights){
+					Flight otherFlight = flightService.getById(flightNum);
+					departureTimes.add(Long.parseLong(otherFlight.getDepartureTime().replace("-", "")));
+					arrivalTimes.add(Long.parseLong(otherFlight.getArrivalTime().replaceAll("-", "")));
+				}
+
+				if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
+				{
+					String errMsg = "There is an overlap of flight time intervals for a passenger. Flight timings cannot be modified";
+					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
+				}
+			}
+		}
+		return null;
+	}
+
 }
