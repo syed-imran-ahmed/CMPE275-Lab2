@@ -87,13 +87,15 @@ public class PassengerController {
 			@RequestParam("phone") String phone) throws JsonProcessingException{
 		
 		Passenger existingPassenger = passengerService.getById(id);
-		List<Passenger> passenger = passengerService.getByPhone(phone);
 		if (existingPassenger == null) {
 			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
 			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
-		} else if(passenger.size()!=0 && passenger.get(0).getId()!=existingPassenger.getId()){
+		}
+	
+		List<Passenger> passenger = passengerService.getByPhone(phone);
+        if(passenger.size()!=0 && passenger.get(0).getId()!=existingPassenger.getId()){
 			String errMsg = "Another passenger with the same phone number already exists.";
 			logger.debug("Another passenger with the same phone number already exists.");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);	

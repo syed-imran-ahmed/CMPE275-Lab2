@@ -216,4 +216,50 @@ public class PassengerControllerUnitTests {
 			}
 		}
 	}
+	
+	@Test
+	public void test_put_passenger_non_existing() throws JsonProcessingException{
+		
+		Mockito.when(passengerService.getById(PASSENGER_ID)).thenReturn(null);
+		
+		ResponseEntity<?> response = controller.updatePassenger(PASSENGER_ID, FIRSTNAME, LASTNAME, AGE, GENDER, PHONE);
+		
+		HttpStatus statusCode = response.getStatusCode();
+        Assert.assertEquals(HttpStatus.NOT_FOUND, statusCode);
+		
+	}
+	
+	@Test
+	public void test_put_existing_passenger() throws JsonProcessingException{
+		
+		Passenger passenger = new Passenger(FIRSTNAME, LASTNAME, AGE, GENDER, PHONE);
+		
+		Mockito.when(passengerService.getById(PASSENGER_ID)).thenReturn(passenger);
+		
+		Mockito.when(passengerService.getById(PHONE)).thenReturn(passenger);
+		
+		ResponseEntity<?> response = controller.updatePassenger(PASSENGER_ID, FIRSTNAME, LASTNAME, AGE, GENDER, PHONE);
+		
+		HttpStatus statusCode = response.getStatusCode();
+        Assert.assertEquals(HttpStatus.OK, statusCode);
+		
+	}
+	
+	@Test
+	public void test_put_existing_passenger_with_same_phone() throws JsonProcessingException{
+		
+		Passenger passenger = new Passenger(FIRSTNAME, LASTNAME, AGE, GENDER, PHONE);
+		
+		Passenger anotherPassenger = new Passenger("somebody", "else", 38, "female", PHONE);
+		anotherPassenger.setId(PASSENGER_ID+1); //make sure it is really a different passenger.
+		
+		Mockito.when(passengerService.getById(PASSENGER_ID)).thenReturn(passenger);
+		
+		Mockito.when(passengerService.getByPhone(PHONE)).thenReturn(Collections.singletonList(anotherPassenger));
+		
+		ResponseEntity<?> response = controller.updatePassenger(PASSENGER_ID, FIRSTNAME, LASTNAME, AGE, GENDER, PHONE);
+		
+		HttpStatus statusCode = response.getStatusCode();
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, statusCode);
+	}
 }
