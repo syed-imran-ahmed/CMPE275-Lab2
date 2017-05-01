@@ -34,4 +34,9 @@ public class ReservationServiceImpl implements ReservationService {
 	public void delete(Serializable id) {
 		reservationRepository.delete((Long) id);
 	}
+
+	@Override
+	public List<Reservation> searchReservations(Long passengerId, String from, String to, String flightNumber) {
+		return reservationRepository.searchReservations(passengerId, from, to, flightNumber);
+	}
 }

@@ -46,7 +46,7 @@ public class ReservationController {
 
 	@Autowired
 	PassengerService passengerService;
-	
+
 	@Autowired
 	ReservationService reservationService;
 
@@ -63,7 +63,7 @@ public class ReservationController {
 			logger.debug("Sorry, the requested passenger with id " + passengerId + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
-		
+
 		List<Flight> flights = new ArrayList<Flight>();
 		List<Reservation> passengerReservations = passenger.getReservations();
 		for(Reservation res : passengerReservations )
@@ -72,11 +72,11 @@ public class ReservationController {
 				flightNumbers.add(flight.getNumber());
 			}
 		}
-		
+
 		ResponseEntity<?> res = checkFlightOverlapping(flights,flightNumbers);
 		if(res!=null)
 			return res;
-		
+
 		Reservation reservation = new Reservation();
 		reservation.setPassenger(passenger);
 		int totalPrice = 0;
@@ -87,30 +87,30 @@ public class ReservationController {
 		reservation.setFlights(flights);
 		reservationService.save(reservation);
 		logger.debug("Created reservation " + reservation.getOrdernumber());
-		
+
 		XStream xs = new XStream();
 		xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
 		xs.setMode(XStream.NO_REFERENCES);
 		xs.alias("passenger", Passenger.class);
 		xs.alias("flight", Flight.class);
 		xs.alias("reservation", Reservation.class);
-		
-		
+
+
 		xs.omitField(Passenger.class, "reservations");
 		xs.omitField(Flight.class, "passengers");
 		xs.omitField(Flight.class, "reservations");
 		xs.omitField(Passenger.class, "flights");
-		
-		  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+
+		//http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
 		xs.addDefaultImplementation(PersistentBag.class, List.class);
 		xs.addDefaultImplementation(Timestamp.class, Date.class);
-	
+
 		HttpHeaders responseHeaders = new HttpHeaders();
-	    responseHeaders.setContentType(MediaType.APPLICATION_XML);
+		responseHeaders.setContentType(MediaType.APPLICATION_XML);
 		return new ResponseEntity<>(xs.toXML(reservation),responseHeaders, HttpStatus.CREATED);
 	}
-	
-	
+
+
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.GET)
 	public ResponseEntity<?> getReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
@@ -123,24 +123,24 @@ public class ReservationController {
 		logger.debug("Found Flight: " + reservation);
 		return new ResponseEntity<Reservation>(reservation, HttpStatus.OK);
 	}
-	
-	
+
+
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(value = "/{ordernumber}",method = RequestMethod.PUT)
 	public ResponseEntity<?> updateReservation(
 			@PathVariable("ordernumber") Long ordernumber,
 			@RequestParam(value="flightsAdded",required = false) List<String> flightsAdded,
 			@RequestParam(value="flightsRemoved",required = false) List<String> flightsRemoved) throws JsonProcessingException{
-		
+
 		Reservation existingReservation = reservationService.getById(ordernumber);
-		
+
 		if (existingReservation == null) {
 			String errMsg = "Sorry, the requested reservation with id " + ordernumber + " does not exist";
 			logger.debug("Sorry, the requested reservationn with id " + ordernumber + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
-	
+
 		} else if((flightsAdded!=null && flightsAdded.size()<=0) || (flightsRemoved!=null && flightsRemoved.size()<=0)){
-			
+
 			String errMsg = "Sorry, the flights list cannot be empty";
 			logger.debug("Sorry, the flights list cannot be empty");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
@@ -165,7 +165,7 @@ public class ReservationController {
 					}
 				}
 			}
-			
+
 			List<Flight> flights = new ArrayList<Flight>(f);
 			if(flightsAdded!=null){
 				ResponseEntity<?> res = checkFlightOverlapping(flights,flightsAdded);
@@ -181,7 +181,7 @@ public class ReservationController {
 			reservationService.save(existingReservation);
 			return new ResponseEntity<Reservation>(existingReservation, HttpStatus.OK);
 		}
-		
+
 		return new ResponseEntity<Reservation>(existingReservation, HttpStatus.OK);
 
 	}
@@ -193,108 +193,40 @@ public class ReservationController {
 			@RequestParam(value="from",required = false) String from,
 			@RequestParam(value="to",required = false) String to,
 			@RequestParam(value="flightNumber",required = false) String flightNumber) throws JsonProcessingException{
-		
+
 		if(passengerId==null && from == null && to == null && flightNumber == null)
 		{
 			String errMsg = "Please specify at least one parameter to search for reservation";
 			logger.debug("Please specify at least one parameter to search for reservation");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
-		
-		List<Reservation> existingReservations = reservationService.getAll();
-		List<Reservation> reservations = new ArrayList<Reservation>(existingReservations);
-		Iterator<Reservation> i = reservations.iterator();
-		
-			if(passengerId!=null){
-				while (i.hasNext()) {
-					Reservation reservation = i.next();
-					if(reservation.getPassenger().getId()!=passengerId)
-					{
-						i.remove();
-					}
-				}
-			}
-			
-			
-			Iterator<Reservation> j = reservations.iterator();
-			if(flightNumber!=null)
-			{
-				while (j.hasNext()) {
-					Reservation reservation = j.next();
-					int count =0;
-					for(Flight flight:reservation.getFlights())
-					{
-						if(flight.getNumber().equals(flightNumber))
-						{
-							count++;
-						}
-					}
-					if(count==0)
-						j.remove();
-				}
-			}
-			
-			
-			Iterator<Reservation> k = reservations.iterator();
-			if(from!=null)
-			{
-				while (k.hasNext()) {
-					Reservation reservation = k.next();
-					int count =0;
-					for(Flight flight:reservation.getFlights())
-					{
-						if(flight.getFromOrigin().equals(from))
-						{
-							count++;
-						}
-					}
-					if(count==0)
-						k.remove();
-				}
-			}
-			
-			Iterator<Reservation> l = reservations.iterator();
-			if(to!=null)
-			{
-				while (l.hasNext()) {
-					Reservation reservation = l.next();
-					int count =0;
-					for(Flight flight:reservation.getFlights())
-					{
-						if(flight.getToDestination().equals(to))
-						{
-							count++;
-						}
-					}
-					if(count==0)
-						l.remove();
-				}
-			}
-			
-			
-			XStream xs = new XStream();
-			xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
-			xs.setMode(XStream.NO_REFERENCES);
-			xs.alias("passenger", Passenger.class);
-			xs.alias("flight", Flight.class);
-			xs.alias("reservation", Reservation.class);
-			
-			
-			xs.omitField(Passenger.class, "reservations");
-			xs.omitField(Flight.class, "passengers");
-			xs.omitField(Flight.class, "reservations");
-			xs.omitField(Passenger.class, "flights");
-			
-			  //http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
-			xs.addDefaultImplementation(PersistentBag.class, List.class);
-			xs.addDefaultImplementation(Timestamp.class, Date.class);
-			
-			HttpHeaders responseHeaders = new HttpHeaders();
-		    responseHeaders.setContentType(MediaType.APPLICATION_XML);
-			return new ResponseEntity<>(xs.toXML(reservations),responseHeaders, HttpStatus.CREATED);
+
+		List<Reservation> reservations = reservationService.searchReservations(passengerId, from, to, flightNumber);
+
+		XStream xs = new XStream();
+		xs.registerConverter(new HibernatePersistentCollectionConverter(xs.getMapper()));
+		xs.setMode(XStream.NO_REFERENCES);
+		xs.alias("passenger", Passenger.class);
+		xs.alias("flight", Flight.class);
+		xs.alias("reservation", Reservation.class);
+		xs.alias("reservations", List.class);
+
+
+		xs.omitField(Passenger.class, "reservations");
+		xs.omitField(Flight.class, "passengers");
+		xs.omitField(Flight.class, "reservations");
+		xs.omitField(Passenger.class, "flights");
+
+		//http://xstream.10960.n7.nabble.com/HibernateCollectionConverter-question-td1620.html
+		xs.addDefaultImplementation(PersistentBag.class, List.class);
+		xs.addDefaultImplementation(Timestamp.class, Date.class);
+
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.APPLICATION_XML);
+		return new ResponseEntity<>(xs.toXML(reservations),responseHeaders, HttpStatus.OK);
 	}
-	
-	
+
+
 	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
 		Reservation reservation = reservationService.getById(ordernumber);
@@ -302,7 +234,7 @@ public class ReservationController {
 			String errMsg = "Reserveration with number " + ordernumber + " does not exist";
 			logger.debug("Reserveration with number " + ordernumber + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
-			
+
 		} else {
 			for(Flight flight:reservation.getFlights())
 			{
@@ -315,12 +247,12 @@ public class ReservationController {
 		}
 	}
 
-	
+
 	ResponseEntity<?> checkFlightOverlapping(List<Flight> flights, List<String> flightNumbers) throws JsonProcessingException
 	{
 		List<Long> arrivalTimes = new ArrayList<Long>();
 		List<Long> departureTimes = new ArrayList<Long>();
-		
+
 		if(flights.size()!=0)
 		{
 			for(Flight flight:flights)
@@ -331,7 +263,7 @@ public class ReservationController {
 				}
 			}
 		}
-		
+
 		for(String flightNumber : flightNumbers){
 			Flight flight = flightService.getById(flightNumber);
 			if (flight == null) {
@@ -339,7 +271,7 @@ public class ReservationController {
 				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exist");
 				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 			}
-			
+
 			if(flight.getSeatsLeft()<=0)
 			{
 				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
@@ -352,8 +284,8 @@ public class ReservationController {
 					flights.add(flight);
 			}
 		}
-		
-	
+
+
 		if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
 		{
 			String errMsg = "There is an overlap of flight time intervals. Reservation cannot be done";
@@ -368,6 +300,6 @@ public class ReservationController {
 		}
 		return null;
 	}
-	
-	
+
+
 }
