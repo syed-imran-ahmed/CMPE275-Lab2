@@ -64,6 +64,17 @@ public class ReservationController {
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 
+		
+		for(String id:flightNumbers)
+		{
+			Flight flight = flightService.getById(id);
+			if(flight.getSeatsLeft()<=0)
+			{
+				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
+				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
+			}
+		}
+		
 		List<Flight> flights = new ArrayList<Flight>();
 		List<Reservation> passengerReservations = passenger.getReservations();
 		for(Reservation res : passengerReservations )
@@ -269,12 +280,6 @@ public class ReservationController {
 			if (flight == null) {
 				String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exist";
 				logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exist");
-				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
-			}
-
-			if(flight.getSeatsLeft()<=0)
-			{
-				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
 				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 			}
 			else{
