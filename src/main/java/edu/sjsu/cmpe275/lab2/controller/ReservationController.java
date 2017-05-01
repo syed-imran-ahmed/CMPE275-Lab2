@@ -64,8 +64,23 @@ public class ReservationController {
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 
+		List<String> dupFlightNum = new ArrayList<String>(flightNumbers);
+		List<Flight> flights = new ArrayList<Flight>();
+		List<Reservation> passengerReservations = passenger.getReservations();
 		
-		for(String id:flightNumbers)
+		for(Reservation res : passengerReservations)
+		{
+			for(Flight flight: res.getFlights()){
+				dupFlightNum.add(flight.getNumber());
+			}
+		}
+
+		ResponseEntity<?> res = checkFlightOverlapping(dupFlightNum);
+		if(res!=null)
+			return res;
+		
+		
+		for(String id : flightNumbers)
 		{
 			Flight flight = flightService.getById(id);
 			if(flight.getSeatsLeft()<=0)
@@ -73,21 +88,13 @@ public class ReservationController {
 				String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
 				return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 			}
-		}
-		
-		List<Flight> flights = new ArrayList<Flight>();
-		List<Reservation> passengerReservations = passenger.getReservations();
-		for(Reservation res : passengerReservations )
-		{
-			for(Flight flight: res.getFlights()){
-				flightNumbers.add(flight.getNumber());
+			else
+			{
+				flights.add(flight);
+				flight.setSeatsLeft(flight.getSeatsLeft()-1);
 			}
 		}
-
-		ResponseEntity<?> res = checkFlightOverlapping(flights,flightNumbers);
-		if(res!=null)
-			return res;
-
+		
 		Reservation reservation = new Reservation();
 		reservation.setPassenger(passenger);
 		int totalPrice = 0;
@@ -178,11 +185,33 @@ public class ReservationController {
 			}
 
 			List<Flight> flights = new ArrayList<Flight>(f);
+			List<String> dupFlightNum = new ArrayList<String>(flightsAdded);
+			
+			for(Flight flight: flights){
+				dupFlightNum.add(flight.getNumber());
+			}
+			
 			if(flightsAdded!=null){
-				ResponseEntity<?> res = checkFlightOverlapping(flights,flightsAdded);
+				ResponseEntity<?> res = checkFlightOverlapping(dupFlightNum);
 				if(res!=null)
 					return res;
 			}
+			
+			for(String id : flightsAdded)
+			{
+				Flight flight = flightService.getById(id);
+				if(flight.getSeatsLeft()<=0)
+				{
+					String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
+					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
+				}
+				else
+				{
+					flights.add(flight);
+					flight.setSeatsLeft(flight.getSeatsLeft()-1);
+				}
+			}
+			
 			existingReservation.setFlights(flights);
 			int totalPrice = 0;
 			for(Flight flight : flights){
@@ -259,21 +288,10 @@ public class ReservationController {
 	}
 
 
-	ResponseEntity<?> checkFlightOverlapping(List<Flight> flights, List<String> flightNumbers) throws JsonProcessingException
+	ResponseEntity<?> checkFlightOverlapping(List<String> flightNumbers) throws JsonProcessingException
 	{
 		List<Long> arrivalTimes = new ArrayList<Long>();
 		List<Long> departureTimes = new ArrayList<Long>();
-
-		if(flights.size()!=0)
-		{
-			for(Flight flight:flights)
-			{
-				if(!flightNumbers.contains(flight.getNumber()))
-				{
-					flightNumbers.add(flight.getNumber());
-				}
-			}
-		}
 
 		for(String flightNumber : flightNumbers){
 			Flight flight = flightService.getById(flightNumber);
@@ -285,23 +303,13 @@ public class ReservationController {
 			else{
 				departureTimes.add(Long.parseLong(flight.getDepartureTime().replace("-", "")));
 				arrivalTimes.add(Long.parseLong(flight.getArrivalTime().replaceAll("-", "")));
-				if(!flights.contains(flight))
-					flights.add(flight);
 			}
 		}
-
 
 		if(flightService.checkIfOverlappingFlightTimes(departureTimes,arrivalTimes))
 		{
 			String errMsg = "There is an overlap of flight time intervals. Reservation cannot be done";
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
-		}
-		else
-		{
-			for(Flight flight:flights)
-			{
-				flight.setSeatsLeft(flight.getSeatsLeft()-1);
-			}
 		}
 		return null;
 	}
