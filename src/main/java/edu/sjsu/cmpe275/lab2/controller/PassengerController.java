@@ -88,8 +88,8 @@ public class PassengerController {
 		
 		Passenger existingPassenger = passengerService.getById(id);
 		if (existingPassenger == null) {
-			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
-			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
+			String errMsg = "Sorry, the requested passenger with id " + id + " does not exist";
+			logger.debug("Sorry, the requested passenger with id " + id + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
 		}
@@ -120,8 +120,8 @@ public class PassengerController {
 		
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
-			String errMsg = "Sorry, the requested passenger with id " + id + " does not exists";
-			logger.debug("Sorry, the requested passenger with id " + id + " does not exists");
+			String errMsg = "Sorry, the requested passenger with id " + id + " does not exist";
+			logger.debug("Sorry, the requested passenger with id " + id + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}
 
@@ -161,8 +161,8 @@ public class PassengerController {
 	public ResponseEntity<?> deletePassenger(@PathVariable("id") Long id) throws JsonProcessingException {
 		Passenger passenger = passengerService.getById(id);
 		if (passenger == null) {
-			String errMsg = "Passenger with id " + id + " does not exists";
-			logger.debug("Passenger with id " + id + " does not exists");
+			String errMsg = "Passenger with id " + id + " does not exist";
+			logger.debug("Passenger with id " + id + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 			
 		} else {

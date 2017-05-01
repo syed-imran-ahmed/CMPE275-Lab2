@@ -63,8 +63,8 @@ public class FlightController {
 		
 		if((Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", ""))) || capacity<=0 || price <=0)
 		{
-			String errMsg = "The parameters given for the filght are incorrect, either the price, capacity or timings are not correct ";
-			logger.debug("The parameters given for the filght are incorrect, either the price, capacity or timings are not correct");
+			String errMsg = "The parameters given for the flight are incorrect, either the price, capacity or timings are not correct ";
+			logger.debug("The parameters given for the flight are incorrect, either the price, capacity or timings are not correct");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
@@ -118,10 +118,11 @@ public class FlightController {
 			@RequestParam(value = "xml", required = false) boolean xml) throws JsonProcessingException {
 		Flight flight = flightService.getById(id);
 		if (flight == null) {
-			String errMsg = "Sorry, the requested flight with id " + id + " does not exists";
-			logger.debug("Sorry, the requested flight with id " + id + " does not exists");
+			String errMsg = "Sorry, the requested flight with id " + id + " does not exist";
+			logger.debug("Sorry, the requested flight with id " + id + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}
+		
 		//Forcefully populating the passengers in the Flight table 
 		List<Passenger> passengers = flight.getPassengers();
 		flight.setPassengers(passengers);
@@ -171,16 +172,16 @@ public class FlightController {
 		
 		if((Long.parseLong(arrivalTime.replace("-", "")) < Long.parseLong(departureTime.replace("-", ""))) || capacity<=0 || price <=0)
 		{
-			String errMsg = "The parameters given for the filght are incorrect, either the price, capacity or timings are not correct ";
-			logger.debug("The parameters given for the filght are incorrect, either the price, capacity or timings are not correct");
+			String errMsg = "The parameters given for the flight are incorrect, either the price, capacity or timings are not correct ";
+			logger.debug("The parameters given for the flight are incorrect, either the price, capacity or timings are not correct");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
 		Flight existingFlight = flightService.getById(flightNumber);
 		
 		if (existingFlight == null) {
-			String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exists";
-			logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exists");
+			String errMsg = "Sorry, the requested flight with id " + flightNumber + " does not exist";
+			logger.debug("Sorry, the requested flight with id " + flightNumber + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
 		} else {
@@ -210,8 +211,8 @@ public class FlightController {
 	public ResponseEntity<?> deleteFlight(@PathVariable("id") String id) throws JsonProcessingException {
 		Flight flight = flightService.getById(id);
 		if (flight == null) {
-			String errMsg = "Sorry, the requested flight with id " + id + " does not exists";
-			logger.debug("Sorry, the requested flight with id " + id + " does not exists");
+			String errMsg = "Sorry, the requested flight with id " + id + " does not exist";
+			logger.debug("Sorry, the requested flight with id " + id + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}else if(!flight.getReservations().isEmpty()){
 			String errMsg = "Flight with " + id + " still has some reservations. It cannot be deleted";

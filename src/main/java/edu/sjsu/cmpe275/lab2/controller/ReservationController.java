@@ -59,8 +59,8 @@ public class ReservationController {
 
 		Passenger passenger = passengerService.getById(passengerId);
 		if (passenger == null) {
-			String errMsg = "Sorry, the requested passenger with id " + passengerId + " does not exists";
-			logger.debug("Sorry, the requested passenger with id " + passengerId + " does not exists");
+			String errMsg = "Sorry, the requested passenger with id " + passengerId + " does not exist";
+			logger.debug("Sorry, the requested passenger with id " + passengerId + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
 		}
 		
@@ -116,8 +116,8 @@ public class ReservationController {
 	public ResponseEntity<?> getReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
 		Reservation reservation = reservationService.getById(ordernumber);
 		if (reservation == null) {
-			String errMsg = "Reserveration with number " + ordernumber + " does not exists";
-			logger.debug("Reserveration with number " + ordernumber + " does not exists");
+			String errMsg = "Reserveration with number " + ordernumber + " does not exist";
+			logger.debug("Reserveration with number " + ordernumber + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 		}
 		logger.debug("Found Flight: " + reservation);
@@ -135,8 +135,8 @@ public class ReservationController {
 		Reservation existingReservation = reservationService.getById(ordernumber);
 		
 		if (existingReservation == null) {
-			String errMsg = "Sorry, the requested reservation with id " + ordernumber + " does not exists";
-			logger.debug("Sorry, the requested reservationn with id " + ordernumber + " does not exists");
+			String errMsg = "Sorry, the requested reservation with id " + ordernumber + " does not exist";
+			logger.debug("Sorry, the requested reservationn with id " + ordernumber + " does not exist");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
 	
 		} else if((flightsAdded!=null && flightsAdded.size()<=0) || (flightsRemoved!=null && flightsRemoved.size()<=0)){
