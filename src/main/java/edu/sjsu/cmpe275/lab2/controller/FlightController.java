@@ -213,7 +213,7 @@ public class FlightController {
 			String errMsg = "Sorry, the requested flight with id " + id + " does not exists";
 			logger.debug("Sorry, the requested flight with id " + id + " does not exists");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
-		}else if(flight.getSeatsLeft() != flight.getPlane().getCapacity()){
+		}else if(!flight.getReservations().isEmpty()){
 			String errMsg = "Flight with " + id + " still has some reservations. It cannot be deleted";
 			logger.debug("Flight with " + id + " still has some reservations. It cannot be deleted");
 			return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
