@@ -9,9 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
 
-/**
- * @author Imran
- */
+
 public class ControllerUtil {
 
 	public static ResponseEntity<?> sendBadRequest(String errMsg, HttpStatus status) throws JsonProcessingException {

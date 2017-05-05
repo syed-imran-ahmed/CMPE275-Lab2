@@ -32,11 +32,8 @@ import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 
-/**
- * 
- * @author Imran
- *
- */
+
+ 
 @RestController
 @RequestMapping("/flight")
 public class FlightController {

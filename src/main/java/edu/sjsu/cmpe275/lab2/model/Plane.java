@@ -4,11 +4,7 @@ import javax.persistence.Embeddable;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-/**
- * 
- * @author Imran
- *
- */
+
 
 @Embeddable
 public class Plane implements java.io.Serializable {
