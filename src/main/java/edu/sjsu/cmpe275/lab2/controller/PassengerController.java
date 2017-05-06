@@ -31,10 +31,15 @@ import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.PassengerService;
 
 /**
- * 
- * @author Imran
- *
- */
+* <h1>Passenger Endpoints</h1>
+* The passenger controller class provides the REST endpoints
+* to map the basic GET,POST,PUT and DELETE request for
+* its corresponding operations 
+*
+* @author  Poojitha Reddy
+* @version 1.0
+* @since   2017-04-23
+*/ 
 
 @RestController
 @RequestMapping("/passenger")
@@ -45,6 +50,15 @@ public class PassengerController {
 	@Autowired
 	PassengerService passengerService;
 
+	/**
+	 * @param firstName
+	 * @param lastName
+	 * @param age
+	 * @param gender
+	 * @param phone
+	 * @return Return the newly created passenger as JSON or the proper error message
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectRelevantFieldsInPassenger.class)
 	@RequestMapping(method = RequestMethod.POST)
 	public ResponseEntity<?> addPassenger(
@@ -76,6 +90,16 @@ public class PassengerController {
 		}
 	}
 
+	/**
+	 * @param id
+	 * @param firstName
+	 * @param lastName
+	 * @param age
+	 * @param gender
+	 * @param phone
+	 * @return return the updated passenger as JSON or on failure return the error message
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectRelevantFieldsInPassenger.class)
 	@RequestMapping(value = "/{id}",method = RequestMethod.PUT)
 	public ResponseEntity<?> updatePassenger(
@@ -112,6 +136,12 @@ public class PassengerController {
 		}
 	}
 
+	/**
+	 * @param id
+	 * @param xml
+	 * @return Return the JSON or XML of a passenger entity or an error message if passenger is not found
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectRelevantFieldsInPassenger.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET,produces={MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<?> getPassenger(
@@ -157,6 +187,11 @@ public class PassengerController {
 				
 	}
 	
+	/**
+	 * @param id
+	 * @return Delete the passenger and return its id, or return the proper error message if no such passenger is found
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deletePassenger(@PathVariable("id") Long id) throws JsonProcessingException {
 		Passenger passenger = passengerService.getById(id);

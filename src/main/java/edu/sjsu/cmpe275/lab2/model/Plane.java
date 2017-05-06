@@ -4,7 +4,17 @@ import javax.persistence.Embeddable;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-
+/**
+* <h1>Model Class for Plane</h1>
+* The plane model class provides the view
+* of the plane and its attributes along with how the 
+* fields will be projected using views.
+* This object will be embedded in the Flight model
+*
+* @author  Poojitha Reddy
+* @version 1.0
+* @since   2017-04-23
+*/ 
 
 @Embeddable
 public class Plane implements java.io.Serializable {

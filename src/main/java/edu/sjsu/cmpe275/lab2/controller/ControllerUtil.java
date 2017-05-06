@@ -12,6 +12,12 @@ import com.thoughtworks.xstream.XStream;
 
 public class ControllerUtil {
 
+	/**
+	 * @param errMsg
+	 * @param status
+	 * @return Bad Request/Not Found along with the passed message
+	 * @throws JsonProcessingException
+	 */
 	public static ResponseEntity<?> sendBadRequest(String errMsg, HttpStatus status) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		BadRequest badRequest = new BadRequest();
@@ -23,6 +29,10 @@ public class ControllerUtil {
 		return new ResponseEntity<String>(jsonString, responseHeaders, status);
 	}
 	
+	/**
+	 * @param errMsg
+	 * @return Success response along with the passed message
+	 */
 	public static ResponseEntity<?> sendSuccess(String errMsg) {
 		Response request = new Response();
 		HttpStatus status = HttpStatus.OK;

@@ -33,8 +33,17 @@ import edu.sjsu.cmpe275.lab2.service.PassengerService;
 import edu.sjsu.cmpe275.lab2.service.ReservationService;
 
 /**
- * @author Imran
- */
+* <h1>Reservation Endpoints</h1>
+* The reservation controller class provides the REST endpoints
+* to map the basic GET,POST,PUT and DELETE request for
+* its corresponding operations along with search reservation
+*
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-04-26
+*/ 
+
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
@@ -50,6 +59,12 @@ public class ReservationController {
 	@Autowired
 	ReservationService reservationService;
 
+	/**
+	 * @param passengerId
+	 * @param flightNumbers
+	 * @return Return the created reservation in XML or else a proper error message
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	public ResponseEntity<?> makeReservation(
@@ -129,6 +144,11 @@ public class ReservationController {
 	}
 
 
+	/**
+	 * @param ordernumber
+	 * @return return the Reservation in JSON or error proper message 
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.GET)
 	public ResponseEntity<?> getReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
@@ -143,8 +163,15 @@ public class ReservationController {
 	}
 
 
+	/**
+	 * @param ordernumber
+	 * @param flightsAdded
+	 * @param flightsRemoved
+	 * @return Return the updated reservation or else a proper error message
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
-	@RequestMapping(value = "/{ordernumber}",method = RequestMethod.PUT)
+	@RequestMapping(value = "/{ordernumber}",method = {RequestMethod.PUT, RequestMethod.POST})
 	public ResponseEntity<?> updateReservation(
 			@PathVariable("ordernumber") Long ordernumber,
 			@RequestParam(value="flightsAdded",required = false) List<String> flightsAdded,
@@ -200,6 +227,11 @@ public class ReservationController {
 			for(String id : flightsAdded)
 			{
 				Flight flight = flightService.getById(id);
+				if (flight == null) {
+					String errMsg = "Sorry, the requested flight with id " + id + " does not exist";
+					logger.debug("Sorry, the requested flight with id " + id + " does not exist");
+					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
+				}
 				if(flight.getSeatsLeft()<=0)
 				{
 					String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
@@ -226,6 +258,14 @@ public class ReservationController {
 
 	}
 
+	/**
+	 * @param passengerId
+	 * @param from
+	 * @param to
+	 * @param flightNumber
+	 * @return Return the search reservation result in xml
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyFlightFieldsInReservation.class)
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<?> searchReservation(
@@ -267,6 +307,11 @@ public class ReservationController {
 	}
 
 
+	/**
+	 * @param ordernumber
+	 * @return Return the deleted order number or proper error message
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value = "/{ordernumber}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteReservation(@PathVariable("ordernumber") Long ordernumber) throws JsonProcessingException {
 		Reservation reservation = reservationService.getById(ordernumber);
@@ -288,6 +333,11 @@ public class ReservationController {
 	}
 
 
+	/**
+	 * @param flightNumbers
+	 * @return Return the error message if the flight times overlap
+	 * @throws JsonProcessingException
+	 */
 	ResponseEntity<?> checkFlightOverlapping(List<String> flightNumbers) throws JsonProcessingException
 	{
 		List<Long> arrivalTimes = new ArrayList<Long>();

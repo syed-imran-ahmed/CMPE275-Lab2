@@ -33,7 +33,17 @@ import edu.sjsu.cmpe275.lab2.model.Views;
 import edu.sjsu.cmpe275.lab2.service.FlightService;
 
 
- 
+/**
+* <h1>Flight Endpoints</h1>
+* The flight controller class provides the REST endpoints
+* to map the basic GET,POST,PUT and DELETE request
+* and its corresponding operations
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-04-24
+*/ 
+
 @RestController
 @RequestMapping("/flight")
 public class FlightController {
@@ -43,6 +53,21 @@ public class FlightController {
 	@Autowired
 	FlightService flightService;
 
+	/**
+	 * @param flightNumber
+	 * @param price
+	 * @param from
+	 * @param to
+	 * @param departureTime
+	 * @param arrivalTime
+	 * @param description
+	 * @param capacity
+	 * @param model
+	 * @param manufacturer
+	 * @param yearOfManufacture
+	 * @return error or JSON response of the newly created flight
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value ="/{flightNumber}", method = RequestMethod.POST)
 	public ResponseEntity<?> addFlight(
@@ -108,6 +133,12 @@ public class FlightController {
 	}
 	
 
+	/**
+	 * @param id
+	 * @param xml
+	 * @return XML or JSON GET flights response based on the request or error message
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public ResponseEntity<?> getFlight(
@@ -152,6 +183,21 @@ public class FlightController {
 		}
 	}
 	
+	/**
+	 * @param flightNumber
+	 * @param price
+	 * @param from
+	 * @param to
+	 * @param departureTime
+	 * @param arrivalTime
+	 * @param description
+	 * @param capacity
+	 * @param model
+	 * @param manufacturer
+	 * @param yearOfManufacture
+	 * @return JSON response of the updated flight or error message
+	 * @throws JsonProcessingException
+	 */
 	@JsonView(Views.ProjectOnlyPassengerFields.class)
 	@RequestMapping(value = "/{flightNumber}",method = RequestMethod.PUT)
 	public ResponseEntity<?> updateFlight(
@@ -204,6 +250,11 @@ public class FlightController {
 	}
 
 	
+	/**
+	 * @param id
+	 * @return Flight id of the deleted flight or the error response if no such flight is there
+	 * @throws JsonProcessingException
+	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<?> deleteFlight(@PathVariable("id") String id) throws JsonProcessingException {
 		Flight flight = flightService.getById(id);
@@ -224,6 +275,15 @@ public class FlightController {
 	
 	
 	
+	/**
+	 * @param existingFlight
+	 * @param flightNumber
+	 * @param departureTime
+	 * @param arrivalTime
+	 * @param capacity
+	 * @return
+	 * @throws JsonProcessingException
+	 */
 	ResponseEntity<?> createOrUpdateFlight(Flight existingFlight, String flightNumber,String departureTime, String arrivalTime, int capacity) throws JsonProcessingException
 	{
 		if(capacity < existingFlight.getPlane().getCapacity() && capacity < existingFlight.getReservations().size()){

@@ -16,6 +16,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonView;
 
 
+/**
+* <h1>Model Class for Flight</h1>
+* The Flight model class provides the entity view
+* of the flight and its attributes along with how the 
+* fields will be projected using views
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-04-22
+*/ 
+
 
 @Entity
 @Table(name = "flight")

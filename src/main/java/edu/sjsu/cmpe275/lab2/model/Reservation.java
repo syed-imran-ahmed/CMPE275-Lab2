@@ -18,11 +18,18 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 /**
- * @author Imran
- */
+* <h1>Model Class for Reservation</h1>
+* The Reservation model class provides the entity view
+* of the reservation and its attributes along with how the 
+* fields will be projected using views
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-04-26
+*/ 
+
 @Entity
 @Table(name = "reservation")
-//@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property="ordernumber")
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=JsonTypeInfo.Id.NAME)
 public class Reservation implements java.io.Serializable {
 

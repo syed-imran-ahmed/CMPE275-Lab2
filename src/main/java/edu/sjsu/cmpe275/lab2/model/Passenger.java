@@ -18,8 +18,16 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
- * @author Imran
- */
+* <h1>Model Class for Passenger</h1>
+* The passenger model class provides the entity view
+* of the passenger and its attributes along with how the 
+* fields will be projected using views
+*
+* @author  Poojitha Reddy
+* @version 1.0
+* @since   2017-04-23
+*/ 
+
 @Entity
 @Table(name = "passenger")
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
