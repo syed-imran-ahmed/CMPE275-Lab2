@@ -10,10 +10,16 @@ import edu.sjsu.cmpe275.lab2.model.Passenger;
 import edu.sjsu.cmpe275.lab2.repository.PassengerRepository;
 
 /**
- * 
- * @author Imran
- *
- */
+* <h1> Passenger Service Implementation</h1>
+* A concrete class for Passenger that provides the passenger services
+* and extends the Passenger Service interface
+* to perform the REST calls
+*
+* @author  Poojitha Reddy
+* @version 1.0
+* @since   2017-04-24
+*/
+
 @Service
 public class PassengerServiceImpl implements PassengerService {
 

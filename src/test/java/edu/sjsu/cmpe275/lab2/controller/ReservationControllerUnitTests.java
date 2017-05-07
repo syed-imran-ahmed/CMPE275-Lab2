@@ -20,6 +20,19 @@ import edu.sjsu.cmpe275.lab2.model.Plane;
 import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.service.ReservationService;
 
+
+/**
+* <h1>Reservation Test Casess</h1>
+* The reservation test class provides the test cases for all the
+* scenarios that are provided as the requirement and has
+* a code coverage of 90% or more as per cobertura
+* 
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-05-03
+*/ 
+
 public class ReservationControllerUnitTests {
 
 	ReservationController controller;

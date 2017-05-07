@@ -13,15 +13,28 @@ import edu.sjsu.cmpe275.lab2.model.Reservation;
 
 
 /**
- * 
- * @author Imran
- *
- */
+* <h1> Reservation repository interface</h1>
+* Derived from JPA repository for Reservation
+* The Reservation repository interface provides the methods to interact 
+* with the ORM without using the queries
+*
+* @author  Syed Imran Ahmed
+* @version 1.0
+* @since   2017-04-25
+*/ 
 
 @Transactional
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long>{
 
+    /**
+     * @param passengerId
+     * @param from
+     * @param to
+     * @param flightNumber
+     * @return Search the flights with the given parameters using AND and if some of the 
+     * parameter is missing then take them as null and give the results
+     */
     @Query("select DISTINCT(R) "+ 
     " from Reservation R "+
     " JOIN R.flights F "+

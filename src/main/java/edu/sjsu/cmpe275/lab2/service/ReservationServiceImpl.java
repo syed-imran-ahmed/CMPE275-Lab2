@@ -9,6 +9,19 @@ import org.springframework.stereotype.Service;
 import edu.sjsu.cmpe275.lab2.model.Reservation;
 import edu.sjsu.cmpe275.lab2.repository.ReservationRepository;
 
+
+
+/**
+* <h1> Reservation Service Implementation</h1>
+* A concrete class for Reservation that provides the Reservation services
+* and extends the Resservation Service interface
+* to perform the REST calls
+*
+* @author  Poojitha REddy
+* @version 1.0
+* @since   2017-04-22
+*/
+
 @Service
 public class ReservationServiceImpl implements ReservationService {
 

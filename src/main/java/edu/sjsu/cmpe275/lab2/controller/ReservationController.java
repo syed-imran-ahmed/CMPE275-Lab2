@@ -212,38 +212,41 @@ public class ReservationController {
 			}
 
 			List<Flight> flights = new ArrayList<Flight>(f);
-			List<String> dupFlightNum = new ArrayList<String>(flightsAdded);
-			
-			for(Flight flight: flights){
-				dupFlightNum.add(flight.getNumber());
-			}
-			
-			if(flightsAdded!=null){
+
+			if(flightsAdded!=null && flightsAdded.size()!=0)
+			{
+				List<String> dupFlightNum = new ArrayList<String>(flightsAdded);
+
+				for(Flight flight: flights){
+					dupFlightNum.add(flight.getNumber());
+				}
+
 				ResponseEntity<?> res = checkFlightOverlapping(dupFlightNum);
 				if(res!=null)
 					return res;
-			}
-			
-			for(String id : flightsAdded)
-			{
-				Flight flight = flightService.getById(id);
-				if (flight == null) {
-					String errMsg = "Sorry, the requested flight with id " + id + " does not exist";
-					logger.debug("Sorry, the requested flight with id " + id + " does not exist");
-					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
-				}
-				if(flight.getSeatsLeft()<=0)
+
+
+				for(String id : flightsAdded)
 				{
-					String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
-					return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
-				}
-				else
-				{
-					flights.add(flight);
-					flight.setSeatsLeft(flight.getSeatsLeft()-1);
+					Flight flight = flightService.getById(id);
+					if (flight == null) {
+						String errMsg = "Sorry, the requested flight to be added with id " + id + " does not exist";
+						logger.debug("Sorry, the requested flight to be added with id " + id + " does not exist");
+						return ControllerUtil.sendBadRequest(errMsg, HttpStatus.NOT_FOUND);
+					}
+					if(flight.getSeatsLeft()<=0)
+					{
+						String errMsg = "The total amount of passengers can not exceed the capacity of the reserved plane. Flight is full!";
+						return ControllerUtil.sendBadRequest(errMsg, HttpStatus.BAD_REQUEST);
+					}
+					else
+					{
+						flights.add(flight);
+						flight.setSeatsLeft(flight.getSeatsLeft()-1);
+					}
 				}
 			}
-			
+
 			existingReservation.setFlights(flights);
 			int totalPrice = 0;
 			for(Flight flight : flights){

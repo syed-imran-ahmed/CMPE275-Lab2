@@ -10,11 +10,18 @@ import org.springframework.stereotype.Service;
 import edu.sjsu.cmpe275.lab2.model.Flight;
 import edu.sjsu.cmpe275.lab2.repository.FlightRepository;
 
+
 /**
- * 
- * @author Imran
- *
- */
+* <h1> Flight Service Implementation</h1>
+* A concrete class for Flight that provides the Flight services
+* and extends the Flight Service interface
+* to perform the REST calls
+*
+* @author  Poojitha Reddy
+* @version 1.0
+* @since   2017-04-24
+*/
+
 @Service
 public class FlightServiceImpl implements FlightService {
 
