@@ -115,7 +115,11 @@ public class FlightController {
 			if(res!=null)
 				return res;
 						
+			
+			List<Passenger> passengers = existingFlight.getPassengers();
+			existingFlight.setPassengers(passengers);
 			existingFlight.setPrice(price);
+			existingFlight.setSeatsLeft(capacity-existingFlight.getPassengers().size());
 			existingFlight.setFromOrigin(from);
 			existingFlight.setToDestination(to);
 			existingFlight.setDepartureTime(departureTime);
@@ -233,7 +237,10 @@ public class FlightController {
 			if(res!=null)
 				return res;
 			
+			List<Passenger> passengers = existingFlight.getPassengers();
+			existingFlight.setPassengers(passengers);
 			existingFlight.setPrice(price);
+			existingFlight.setSeatsLeft(capacity-existingFlight.getPassengers().size());
 			existingFlight.setFromOrigin(from);
 			existingFlight.setToDestination(to);
 			existingFlight.setDepartureTime(departureTime);
